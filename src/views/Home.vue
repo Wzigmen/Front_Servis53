@@ -1,402 +1,777 @@
 <template>
-  <div class="home-page">
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <h1>Профессиональный ремонт<br>ПК и телефонов</h1>
-        <p>Быстро, качественно, с гарантией! Ваши устройства в надёжных руках.</p>
-        <div class="hero-buttons">
-          <router-link to="/services" class="btn btn-primary">Наши услуги</router-link>
-          <router-link to="/contacts" class="btn btn-secondary">Связаться с нами</router-link>
-        </div>
-      </div>
-      <div class="hero-image">
-        <div class="hero-visual">
-          <span class="visual-icon">💻📱</span>
-        </div>
-      </div>
-    </section>
+  <section class="hero">
 
-    <!-- Преимущества -->
-    <section class="advantages">
-      <div class="container">
-        <h2 class="section-title">Почему выбирают нас</h2>
-        <div class="advantages-grid">
-          <div class="advantage-card">
-            <div class="advantage-icon">⚡</div>
-            <h3>Быстро</h3>
-            <p>Срочный ремонт от 30 минут</p>
-          </div>
-          <div class="advantage-card">
-            <div class="advantage-icon">🛡️</div>
-            <h3>Гарантия</h3>
-            <p>До 12 месяцев на все работы</p>
-          </div>
-          <div class="advantage-card">
-            <div class="advantage-icon">💎</div>
-            <h3>Качественно</h3>
-            <p>Оригинальные запчасти</p>
-          </div>
-          <div class="advantage-card">
-            <div class="advantage-icon">💰</div>
-            <h3>Выгодно</h3>
-            <p>Честные цены без накруток</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="container hero-container">
 
-    <!-- Мастера -->
-    <section class="masters">
-      <div class="container">
-        <h2 class="section-title">Наши мастера</h2>
-        <p class="section-subtitle">Команда профессионалов с многолетним опытом</p>
-        <div class="masters-grid">
-          <div class="master-card" v-for="master in masters" :key="master.id">
-            <div class="master-avatar">
-              <span class="avatar-emoji">{{ master.emoji }}</span>
-            </div>
-            <h3>{{ master.name }}</h3>
-            <p class="master-role">{{ master.role }}</p>
-            <p class="master-experience">{{ master.experience }}</p>
-            <div class="master-skills">
-              <span class="skill-tag" v-for="skill in master.skills" :key="skill">
-                {{ skill }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+      <div class="hero-left">
 
-    <!-- Призыв к действию -->
-    <section class="cta">
-      <div class="container">
-        <div class="cta-content">
-          <h2>Готовы начать?</h2>
-          <p>Оставьте заявку и мы свяжемся с вами в течение 15 минут</p>
-          <router-link to="/contacts" class="btn btn-primary btn-large">
+        <span class="badge">
+          Сервисный центр №1 в Великом Новгороде
+        </span>
+
+        <h1>
+          Ремонт техники
+          <span>быстро</span>,
+          <span>качественно</span>
+          и с гарантией.
+        </h1>
+
+        <p>
+          Ремонтируем телефоны, ноутбуки, компьютеры,
+          игровые приставки и другую электронику.
+          Также продаём новую и проверенную б/у технику.
+        </p>
+
+        <div class="buttons">
+
+          <button class="btn">
             Оставить заявку
-          </router-link>
+          </button>
+
+          <button class="btn-secondary">
+            Перейти в магазин
+          </button>
+
         </div>
+
+        <div class="stats">
+
+          <div>
+            <h2>2500+</h2>
+            <span>ремонтов</span>
+          </div>
+
+          <div>
+            <h2>98%</h2>
+            <span>довольных клиентов</span>
+          </div>
+
+          <div>
+            <h2>12 мес.</h2>
+            <span>гарантия</span>
+          </div>
+
+        </div>
+
       </div>
-    </section>
+
+      <div class="hero-right">
+
+  <div class="glow"></div>
+
+    <img src="@/assets/images/hero/laptop.png" class="device laptop" />
+    <img src="@/assets/images/hero/phone.png" class="device phone" />
+    <img src="@/assets/images/hero/headphones.png" class="device headphones" />
+
+</div>
+
+    </div>
+
+  </section>
+  <section class="features">
+
+  <div class="container">
+
+    <h2 class="section-title">
+      Почему выбирают нас
+    </h2>
+
+    <p class="section-subtitle">
+      Быстро. Надёжно. С гарантией.
+    </p>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="icon">⚡</div>
+        <h3>Быстрый ремонт</h3>
+        <p>Большинство устройств ремонтируем в течение 1 дня</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">🛡️</div>
+        <h3>Гарантия</h3>
+        <p>До 12 месяцев гарантии на все виды ремонта</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">💰</div>
+        <h3>Честные цены</h3>
+        <p>Без скрытых платежей и навязанных услуг</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">📦</div>
+        <h3>Запчасти в наличии</h3>
+        <p>Используем только проверенные комплектующие</p>
+      </div>
+
+    </div>
+
   </div>
+
+</section>
+<section class="services">
+
+  <div class="container">
+
+    <h2 class="section-title">
+      Наши услуги
+    </h2>
+
+    <p class="section-subtitle">
+      Ремонт любой техники — от телефонов до ПК
+    </p>
+
+    <div class="services-grid">
+
+      <div class="service-card">
+        <div class="service-icon">📱</div>
+        <h3>Ремонт телефонов</h3>
+        <p>Замена экранов, батарей, восстановление после воды</p>
+        <span>от 990 ₽</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">💻</div>
+        <h3>Ремонт ноутбуков</h3>
+        <p>Материнские платы, чистка, замена комплектующих</p>
+        <span>от 1490 ₽</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">🖥️</div>
+        <h3>Ремонт ПК</h3>
+        <p>Сборка, апгрейд, диагностика и ремонт</p>
+        <span>от 990 ₽</span>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon">⚙️</div>
+        <h3>Диагностика</h3>
+        <p>Полная проверка устройства и выявление проблем</p>
+        <span>Бесплатно</span>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+<section class="products">
+
+  <div class="container">
+
+    <h2 class="section-title">
+      Популярные товары
+    </h2>
+
+    <p class="section-subtitle">
+      Лучшие предложения магазина Servis53
+    </p>
+
+    <div class="products-grid">
+
+      <div class="product-card">
+
+        <div class="product-image">
+          <span class="heart">❤️</span>
+          <img src="@/assets/images/hero/laptop.png" />
+        </div>
+
+        <h3>ASUS VivoBook 15</h3>
+
+        <div class="rating">⭐⭐⭐⭐☆</div>
+
+        <div class="price">59 990 ₽</div>
+
+        <button>В корзину</button>
+
+      </div>
+
+      <div class="product-card">
+
+        <div class="product-image">
+          <span class="heart">❤️</span>
+          <img src="@/assets/images/hero/laptop.png" />
+        </div>
+
+        <h3>Lenovo IdeaPad</h3>
+
+        <div class="rating">⭐⭐⭐⭐⭐</div>
+
+        <div class="price">49 990 ₽</div>
+
+        <button>В корзину</button>
+
+      </div>
+
+      <div class="product-card">
+
+        <div class="product-image">
+          <span class="heart">❤️</span>
+          <img src="@/assets/images/hero/laptop.png" />
+        </div>
+
+        <h3>HP Pavilion</h3>
+
+        <div class="rating">⭐⭐⭐⭐☆</div>
+
+        <div class="price">54 990 ₽</div>
+
+        <button>В корзину</button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+<section class="cta">
+
+  <div class="container cta-box">
+
+    <div class="cta-text">
+
+      <h2>Нужен срочный ремонт?</h2>
+
+      <p>
+        Оставьте заявку и мы свяжемся с вами в течение 10 минут.
+        Диагностика бесплатно.
+      </p>
+
+    </div>
+
+    <div class="cta-form">
+
+      <input type="text" placeholder="Ваше имя" />
+      <input type="text" placeholder="Телефон" />
+      <input type="text" placeholder="Описание проблемы" />
+
+      <button>Отправить заявку</button>
+
+    </div>
+
+  </div>
+
+</section>
 </template>
 
-<script>
-export default {
-  name: 'Home',
-  data() {
-    return {
-      masters: [
-        {
-          id: 1,
-          name: 'Алексей Петров',
-          emoji: '👨‍💻',
-          role: 'Старший инженер',
-          experience: '10 лет опыта',
-          skills: ['Ремонт ПК', 'Сборка', 'Диагностика']
-        },
-        {
-          id: 2,
-          name: 'Дмитрий Иванов',
-          emoji: '👨‍🔧',
-          role: 'Мастер по телефонам',
-          experience: '7 лет опыта',
-          skills: ['Ремонт смартфонов', 'Замена экранов', 'Восстановление']
-        },
-        {
-          id: 3,
-          name: 'Мария Сидорова',
-          emoji: '👩‍💻',
-          role: 'IT-специалист',
-          experience: '5 лет опыта',
-          skills: ['Настройка ПО', 'Удаление вирусов', 'Консультации']
-        }
-      ]
-    }
-  }
-}
+<script setup>
 </script>
 
 <style scoped>
-.home-page {
-  min-height: 100vh;
+
+.hero{
+
+    padding:90px 0;
+
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+.hero-container{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    align-items:center;
+
+    gap:80px;
+
 }
 
-/* Hero Section */
-.hero {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  padding: 80px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 500px;
+.badge{
+
+    display:inline-block;
+
+    padding:10px 18px;
+
+    background:#dbeafe;
+
+    color:#2563eb;
+
+    border-radius:999px;
+
+    margin-bottom:25px;
+
+    font-weight:600;
+
 }
 
-.hero-content {
-  text-align: center;
-  color: white;
-  max-width: 800px;
+.hero h1{
+
+    font-size:64px;
+
+    line-height:1.1;
+
+    margin-bottom:30px;
+
 }
 
-.hero-content h1 {
-  font-size: 48px;
-  margin-bottom: 20px;
-  line-height: 1.2;
+.hero h1 span{
+
+    color:#2563eb;
+
 }
 
-.hero-content p {
-  font-size: 20px;
-  margin-bottom: 30px;
-  color: rgba(255, 255, 255, 0.8);
+.hero p{
+
+    color:#6b7280;
+
+    font-size:20px;
+
+    line-height:1.7;
+
+    margin-bottom:35px;
+
 }
 
-.hero-buttons {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
+.buttons{
+
+    display:flex;
+
+    gap:20px;
+
+    margin-bottom:55px;
+
 }
 
-.btn {
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  border: none;
+.btn-secondary{
+
+    padding:15px 28px;
+
+    background:white;
+
+    border:2px solid #2563eb;
+
+    color:#2563eb;
+
+    border-radius:14px;
+
+    transition:.3s;
+
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-  color: white;
+.btn-secondary:hover{
+
+    background:#2563eb;
+
+    color:white;
+
 }
 
-.btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+.stats{
+
+    display:flex;
+
+    gap:50px;
+
 }
 
-.btn-secondary {
-  background: transparent;
-  color: white;
-  border: 2px solid white;
+.stats h2{
+
+    color:#2563eb;
+
+    font-size:34px;
+
 }
 
-.btn-secondary:hover {
-  background: white;
-  color: #1a1a2e;
+.stats span{
+
+    color:#6b7280;
+
 }
 
-.btn-large {
-  padding: 18px 48px;
-  font-size: 18px;
+.hero-right{
+
+    position:relative;
+
+    display:flex;
+
+    justify-content:center;
+
 }
 
-.hero-image {
-  display: none;
+.circle{
+
+    position:absolute;
+
+    width:520px;
+
+    height:520px;
+
+    border-radius:50%;
+
+    background:#dbeafe;
+
+    filter:blur(30px);
+
 }
 
-.hero-visual {
-  font-size: 120px;
+.laptop{
+
+    position:relative;
+
+    width:600px;
+
+    z-index:2;
+
 }
 
-/* Section styles */
-.section-title {
-  font-size: 36px;
-  text-align: center;
-  margin-bottom: 10px;
-  color: #1a1a2e;
+@media(max-width:1100px){
+
+.hero-container{
+
+grid-template-columns:1fr;
+
+text-align:center;
+
 }
 
-.section-subtitle {
-  text-align: center;
-  color: #666;
-  font-size: 18px;
-  margin-bottom: 50px;
+.buttons{
+
+justify-content:center;
+
 }
 
-/* Advantages */
-.advantages {
-  padding: 80px 0;
-  background: #f8f9fa;
+.stats{
+
+justify-content:center;
+
 }
 
-.advantages-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
+}
+.hero-right{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:600px;
 }
 
-.advantage-card {
-  background: white;
-  padding: 40px 30px;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease;
+/* мягкое свечение */
+.glow{
+    position:absolute;
+    width:500px;
+    height:500px;
+    background:radial-gradient(circle, rgba(37,99,235,0.25), transparent 70%);
+    filter:blur(20px);
+    border-radius:50%;
 }
 
-.advantage-card:hover {
-  transform: translateY(-10px);
+/* общие стили устройств */
+.device{
+    position:absolute;
+    width:220px;
+    z-index:2;
+    transition:0.4s ease;
+    animation:float 6s ease-in-out infinite;
 }
 
-.advantage-icon {
-  font-size: 48px;
-  margin-bottom: 20px;
+/* расположение */
+.laptop{
+    width:360px;
+    z-index:3;
 }
 
-.advantage-card h3 {
-  font-size: 22px;
-  color: #1a1a2e;
-  margin-bottom: 10px;
+.phone{
+    width:160px;
+    top:60px;
+    left:-40px;
+    animation-delay:1s;
 }
 
-.advantage-card p {
-  color: #666;
-  font-size: 15px;
+.headphones{
+    width:180px;
+    bottom:40px;
+    right:-30px;
+    animation-delay:2s;
 }
 
-/* Masters */
-.masters {
-  padding: 80px 0;
+/* плавное “парение” */
+@keyframes float{
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
 }
 
-.masters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  justify-content: center;
+/* hover эффект */
+.hero-right:hover .device{
+    transform: scale(1.05);
 }
 
-.master-card {
-  background: white;
-  padding: 40px 30px;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease;
+.features{
+    padding:100px 0;
+    background:#f8fafc;
 }
 
-.master-card:hover {
-  transform: translateY(-10px);
+.section-title{
+    text-align:center;
+    font-size:42px;
+    margin-bottom:10px;
 }
 
-.master-avatar {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00d4ff 0%, #7b2cbf 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 60px;
+.section-subtitle{
+    text-align:center;
+    color:#6b7280;
+    margin-bottom:60px;
 }
 
-.master-card h3 {
-  font-size: 22px;
-  color: #1a1a2e;
-  margin-bottom: 5px;
+.features-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:25px;
 }
 
-.master-role {
-  color: #00d4ff;
-  font-weight: 600;
-  margin-bottom: 5px;
+.feature-card{
+    background:white;
+    padding:30px;
+    border-radius:18px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+    transition:0.3s ease;
 }
 
-.master-experience {
-  color: #666;
-  font-size: 14px;
-  margin-bottom: 20px;
+.feature-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 15px 35px rgba(0,0,0,0.1);
 }
 
-.master-skills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
+.icon{
+    font-size:40px;
+    margin-bottom:15px;
 }
 
-.skill-tag {
-  background: #f0f0f0;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #555;
+.feature-card h3{
+    margin-bottom:10px;
 }
 
-/* CTA */
-.cta {
-  background: linear-gradient(135deg, #00d4ff 0%, #7b2cbf 100%);
-  padding: 80px 20px;
+.feature-card p{
+    color:#6b7280;
+    font-size:14px;
 }
 
-.cta-content {
-  text-align: center;
-  color: white;
+/* адаптив */
+@media(max-width:1000px){
+    .features-grid{
+        grid-template-columns:repeat(2, 1fr);
+    }
 }
 
-.cta-content h2 {
-  font-size: 36px;
-  margin-bottom: 15px;
+@media(max-width:600px){
+    .features-grid{
+        grid-template-columns:1fr;
+    }
 }
 
-.cta-content p {
-  font-size: 18px;
-  margin-bottom: 30px;
-  opacity: 0.9;
+.services{
+    padding:100px 0;
+    background:white;
 }
 
-.cta .btn-primary {
-  background: white;
-  color: #7b2cbf;
+.services-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:25px;
 }
 
-.cta .btn-primary:hover {
-  background: #f0f0f0;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+.service-card{
+    background:#f8fafc;
+    padding:30px;
+    border-radius:18px;
+    transition:0.3s ease;
+    border:1px solid #eee;
 }
 
-@media (max-width: 768px) {
-  .hero {
-    padding: 60px 20px;
-  }
-
-  .hero-content h1 {
-    font-size: 32px;
-  }
-
-  .hero-content p {
-    font-size: 16px;
-  }
-
-  .section-title {
-    font-size: 28px;
-  }
-
-  .advantages,
-  .masters {
-    padding: 60px 0;
-  }
-
-  .cta {
-    padding: 60px 20px;
-  }
-
-  .cta-content h2 {
-    font-size: 28px;
-  }
+.service-card:hover{
+    transform:translateY(-10px);
+    box-shadow:0 15px 35px rgba(0,0,0,0.08);
+    background:white;
 }
+
+.service-icon{
+    font-size:40px;
+    margin-bottom:15px;
+}
+
+.service-card h3{
+    margin-bottom:10px;
+}
+
+.service-card p{
+    color:#6b7280;
+    font-size:14px;
+    margin-bottom:15px;
+}
+
+.service-card span{
+    font-weight:700;
+    color:#2563eb;
+}
+
+/* адаптив */
+@media(max-width:1000px){
+    .services-grid{
+        grid-template-columns:repeat(2, 1fr);
+    }
+}
+
+@media(max-width:600px){
+    .services-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+.products{
+    padding:100px 0;
+    background:#f8fafc;
+}
+
+.products-grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:25px;
+}
+
+.product-card{
+    background:white;
+    padding:20px;
+    border-radius:18px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+    transition:0.3s ease;
+    text-align:center;
+}
+
+.product-card:hover{
+    transform:translateY(-10px);
+}
+
+.product-image{
+    position:relative;
+    height:180px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.product-image img{
+    max-height:160px;
+    object-fit:contain;
+}
+
+.heart{
+    position:absolute;
+    top:10px;
+    right:10px;
+    cursor:pointer;
+}
+
+.rating{
+    margin:10px 0;
+    color:#f59e0b;
+}
+
+.price{
+    font-size:20px;
+    font-weight:700;
+    color:#2563eb;
+    margin-bottom:10px;
+}
+
+.product-card button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.product-card button:hover{
+    background:#1d4ed8;
+}
+
+/* адаптив */
+@media(max-width:1000px){
+    .products-grid{
+        grid-template-columns:repeat(2, 1fr);
+    }
+}
+
+@media(max-width:600px){
+    .products-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+.cta{
+    padding:100px 0;
+    background:#2563eb;
+}
+
+.cta-box{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+    align-items:center;
+
+    background:white;
+    padding:50px;
+    border-radius:20px;
+}
+
+.cta-text h2{
+    font-size:36px;
+    margin-bottom:15px;
+}
+
+.cta-text p{
+    color:#6b7280;
+    font-size:18px;
+    line-height:1.6;
+}
+
+.cta-form{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.cta-form input{
+    padding:14px;
+    border:1px solid #ddd;
+    border-radius:12px;
+    outline:none;
+    transition:0.3s;
+}
+
+.cta-form input:focus{
+    border-color:#2563eb;
+}
+
+.cta-form button{
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.cta-form button:hover{
+    background:#1d4ed8;
+}
+
+/* адаптив */
+@media(max-width:900px){
+    .cta-box{
+        grid-template-columns:1fr;
+        text-align:center;
+    }
+}
+
 </style>

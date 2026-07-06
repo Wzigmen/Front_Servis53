@@ -1,0 +1,27 @@
+@import "./variables.css";
+@import "./reset.css";
+
+.container{
+    width:min(1400px,92%);
+    margin:auto;
+}
+
+.section{
+    padding:80px 0;
+}
+
+.btn{
+    padding:15px 28px;
+
+    border-radius:14px;
+
+    background:var(--primary);
+
+    color:white;
+
+    transition:.3s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
+}

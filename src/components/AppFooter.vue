@@ -1,160 +1,100 @@
- <template>
-  <footer class="app-footer">
-    <div class="footer-container">
-      <div class="footer-main">
-        <div class="footer-brand">
-          <div class="footer-logo">
-            <span class="logo-icon">🔧</span>
-            <span class="logo-text">Сервис53</span>
-          </div>
-          <p class="footer-description">
-            Профессиональный ремонт и обслуживание ПК и телефонов.
-            Быстро, качественно, с гарантией!
-          </p>
-        </div>
+<template>
+  <footer class="footer">
 
-        <div class="footer-links">
-          <h4>Навигация</h4>
-          <nav>
-            <router-link to="/">Главная</router-link>
-            <router-link to="/services">Услуги</router-link>
-            <router-link to="/shop">Магазин</router-link>
-            <router-link to="/contacts">Контакты</router-link>
-          </nav>
-        </div>
+    <div class="container footer-grid">
 
-        <div class="footer-contacts">
-          <h4>Контакты</h4>
-          <p>📍 г. Великий Новгород, ул. Примерная, д. 53</p>
-          <p>📞 <a href="tel:+78162123456">+7 (8162) 12-34-56</a></p>
-          <p>✉️ <a href="mailto:info@servis53.ru">info@servis53.ru</a></p>
-          <p>🕐 Пн-Пт: 9:00 - 20:00</p>
-        </div>
+      <div class="footer-block">
+        <h3>Servis53</h3>
+        <p>Ремонт и продажа техники с гарантией качества.</p>
       </div>
 
-      <div class="footer-bottom">
-        <p>&copy; 2024 Сервис53. Все права защищены.</p>
+      <div class="footer-block">
+        <h4>Навигация</h4>
+        <a href="#">Главная</a>
+        <a href="#">Услуги</a>
+        <a href="#">Магазин</a>
+        <a href="#">Контакты</a>
       </div>
+
+      <div class="footer-block">
+        <h4>Контакты</h4>
+        <p>📍 Великий Новгород</p>
+        <p>📞 +7 (999) 123-45-67</p>
+        <p>✉ info@servis53.ru</p>
+      </div>
+
+      <div class="footer-block">
+        <h4>Мы в соцсетях</h4>
+        <a href="#">VK</a>
+        <a href="#">Telegram</a>
+        <a href="#">YouTube</a>
+      </div>
+
     </div>
+
+    <div class="footer-bottom">
+      © 2026 Servis53. Все права защищены.
+    </div>
+
   </footer>
 </template>
 
-<script>
-export default {
-  name: 'AppFooter'
-}
-</script>
-
 <style scoped>
-.app-footer {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: white;
-  padding: 60px 20px 20px;
+
+.footer{
+    background:#0f172a;
+    color:white;
+    padding:80px 0 20px;
+    margin-top:100px;
 }
 
-.footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.footer-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:40px;
 }
 
-.footer-main {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 40px;
-  margin-bottom: 40px;
+.footer-block h3{
+    font-size:24px;
+    margin-bottom:10px;
+    color:#2563eb;
 }
 
-.footer-brand {
-  max-width: 350px;
+.footer-block h4{
+    margin-bottom:15px;
 }
 
-.footer-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+.footer-block p,
+.footer-block a{
+    display:block;
+    color:#cbd5e1;
+    margin-bottom:8px;
+    text-decoration:none;
+    transition:0.3s;
 }
 
-.footer-logo .logo-icon {
-  font-size: 32px;
+.footer-block a:hover{
+    color:#2563eb;
 }
 
-.footer-logo .logo-text {
-  font-size: 24px;
-  font-weight: bold;
-  background: linear-gradient(135deg, #00d4ff 0%, #7b2cbf 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.footer-bottom{
+    text-align:center;
+    margin-top:50px;
+    padding-top:20px;
+    border-top:1px solid #1e293b;
+    color:#94a3b8;
 }
 
-.footer-description {
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.6;
+@media(max-width:900px){
+    .footer-grid{
+        grid-template-columns:1fr 1fr;
+    }
 }
 
-.footer-links h4,
-.footer-contacts h4 {
-  font-size: 18px;
-  margin-bottom: 20px;
-  color: white;
-}
-
-.footer-links nav {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.footer-links a {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  transition: color 0.3s;
-  font-size: 15px;
-}
-
-.footer-links a:hover {
-  color: #00d4ff;
-}
-
-.footer-contacts p {
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 10px;
-  font-size: 15px;
-}
-
-.footer-contacts a {
-  color: rgba(255, 255, 255, 0.7);
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.footer-contacts a:hover {
-  color: #00d4ff;
-}
-
-.footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 20px;
-  text-align: center;
-}
-
-.footer-bottom p {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 14px;
-}
-
-@media (max-width: 768px) {
-  .app-footer {
-    padding: 40px 20px 20px;
-  }
-
-  .footer-main {
-    gap: 30px;
-  }
-
-  .footer-brand {
-    max-width: 100%;
-  }
+@media(max-width:600px){
+    .footer-grid{
+        grid-template-columns:1fr;
+        text-align:center;
+    }
 }
 </style>
