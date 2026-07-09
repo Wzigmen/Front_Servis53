@@ -1,89 +1,313 @@
 <template>
+  <header
+    class="header"
+    :class="{ scrolled: isScrolled }"
+>
+    <div class="container header-container">
 
-    <header class="header">
+      <!-- Логотип -->
+      <RouterLink to="/" class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Servis53</span>
+      </RouterLink>
 
-        <div class="container header-container">
+      <!-- Навигация -->
+      <nav class="nav">
+        <RouterLink to="/">Главная</RouterLink>
+        <RouterLink to="/services">Услуги</RouterLink>
+        <RouterLink to="/shop">Магазин</RouterLink>
+        <RouterLink to="/contacts">Контакты</RouterLink>
+      </nav>
 
-            <HeaderLogo />
+      <!-- Правая часть -->
+      <div class="actions">
 
-            <div class="desktop">
+        <button class="icon-btn">
+          <Search :size="20" />
+        </button>
 
-                <HeaderNav />
+        <button class="icon-btn">
+          <Heart :size="20" />
+        </button>
 
-                <HeaderSearch />
+        <button class="icon-btn">
+          <ShoppingCart :size="20" />
+        </button>
 
-                <HeaderActions />
+        <RouterLink
+          v-if="!auth.isAuthenticated"
+          to="/login"
+          class="login-btn"
+        >
+          Войти
+        </RouterLink>
 
-            </div>
+        <RouterLink
+          v-else
+          to="/profile"
+          class="profile-btn"
+        >
+          <User :size="18" />
+          {{ auth.user?.fullName }}
+        </RouterLink>
 
-            <BurgerButton @toggle="menuOpen = true" />
+      </div>
 
-        </div>
-
-    </header>
-
-    <MobileMenu :open="menuOpen" @close="menuOpen = false" />
-
+    </div>
+  </header>
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from "vue";
+import { Search, Heart, ShoppingCart, User } from "lucide-vue-next";
+import { useAuthStore } from "@/stores/auth";
 
-import { ref } from "vue";
+const auth = useAuthStore();
 
-import HeaderLogo from "./HeaderLogo.vue";
-import HeaderNav from "./HeaderNav.vue";
-import HeaderSearch from "./HeaderSearch.vue";
-import HeaderActions from "./HeaderActions.vue";
+const isScrolled = ref(false);
 
-import BurgerButton from "./BurgerButton.vue";
-import MobileMenu from "./MobileMenu.vue";
+const handleScroll = () => {
+    isScrolled.value = window.scrollY > 40;
+};
 
-const menuOpen = ref(false);
+onMounted(() => {
+    window.addEventListener("scroll", handleScroll);
+});
 
+onUnmounted(() => {
+    window.removeEventListener("scroll", handleScroll);
+});
 </script>
 
 <style scoped>
-.header {
 
-    position: sticky;
+.header{
 
-    top: 0;
+    position:sticky;
+    top:0;
 
-    z-index: 1000;
+    z-index:1000;
 
-    background: rgba(255, 255, 255, .9);
+    background:rgba(255,255,255,.85);
 
-    backdrop-filter: blur(18px);
+    backdrop-filter:blur(18px);
 
-    border-bottom: 1px solid var(--border);
-
-}
-
-.header-container {
-    height: 72px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.desktop {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 30px;
+    border-bottom:1px solid var(--border);
 
 }
 
-@media(max-width:992px) {
+.header-container{
 
-    .desktop {
+    display:flex;
 
-        display: none;
+    align-items:center;
 
-    }
+    justify-content:space-between;
+
+    height:80px;
+
+}
+
+.logo{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:24px;
+
+    font-weight:800;
+
+}
+
+.logo-icon{
+
+    color:var(--primary);
+
+}
+
+.logo-text{
+
+    color:var(--text);
+
+}
+
+.nav{
+
+    display:flex;
+
+    gap:36px;
+
+}
+
+.nav a{
+
+    position:relative;
+
+    color:var(--text-light);
+
+    font-weight:500;
+
+    transition:.3s;
+
+}
+
+.nav a::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    bottom:-8px;
+
+    width:0;
+
+    height:3px;
+
+    border-radius:999px;
+
+    background:var(--primary);
+
+    transition:.3s;
+
+}
+
+.nav a:hover{
+
+    color:var(--text);
+
+}
+
+.nav a:hover::after{
+
+    width:100%;
+
+}
+
+.router-link-active{
+
+    color:var(--primary)!important;
+
+}
+
+.router-link-active::after{
+
+    width:100%!important;
+
+}
+
+.actions{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.icon-btn{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    transition:.3s;
+
+}
+
+.icon-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:var(--shadow-sm);
+
+}
+
+.login-btn{
+
+    padding:12px 24px;
+
+    border-radius:var(--radius-md);
+
+    background:var(--primary);
+
+    color:white;
+
+    font-weight:600;
+
+    transition:.3s;
+
+}
+
+.login-btn:hover{
+
+    background:var(--primary-hover);
+
+}
+
+.profile-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    padding:10px 18px;
+
+    border-radius:999px;
+
+    background:white;
+
+    border:1px solid var(--border);
+
+}
+.header{
+    transition: all .35s ease;
+}
+
+.header-container{
+    transition: all .35s ease;
+}
+
+.logo{
+    transition: all .35s ease;
+}
+
+.scrolled{
+
+    background:rgba(255,255,255,.96);
+
+    box-shadow:0 10px 40px rgba(0,0,0,.08);
+
+}
+
+.scrolled .header-container{
+
+    height:64px;
+
+}
+
+.scrolled .logo{
+
+    font-size:21px;
 
 }
 </style>

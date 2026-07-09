@@ -1,85 +1,175 @@
 <template>
 
-    <section class="shop">
-
-        <div class="container">
-
-            <h1>Каталог товаров</h1>
-
-            <div class="shop-layout">
-
-                <aside class="filters">
-
-                    Фильтры
-
-                </aside>
+<section class="shop">
 
 
-                <main class="products">
-
-                    <div v-for="product in products" :key="product.id" class="product-card">
-
-                        <h2>
-                            {{ product.name }}
-                        </h2>
-
-                        <p>
-                            {{ product.description }}
-                        </p>
-
-                        <p>
-                            Бренд: {{ product.brand }}
-                        </p>
-
-                        <p>
-                            Категория: {{ product.category }}
-                        </p>
-
-                        <h3>
-                            {{ product.price }} ₽
-                        </h3>
-
-                    </div>
-
-                </main>
+<div class="container">
 
 
-            </div>
+<!-- Заголовок -->
 
-        </div>
+<div class="shop-header">
 
-    </section>
+    <div>
+
+        <h1>
+            Каталог техники
+        </h1>
+
+        <p>
+            Телефоны, ноутбуки, компьютеры и аксессуары
+        </p>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- Панель магазина -->
+
+<div class="shop-layout">
+
+
+<!-- Левая часть -->
+
+<aside class="sidebar">
+
+
+<div class="filter-placeholder">
+
+    <h2>
+        Фильтры
+    </h2>
+
+
+    <p>
+        Здесь будут фильтры
+    </p>
+
+</div>
+
+
+</aside>
+
+
+
+
+<!-- Правая часть -->
+
+<main class="products-area">
+
+
+
+<div class="toolbar">
+
+
+<span>
+
+Найдено товаров: {{ products.length }}
+
+</span>
+
+
+
+<select>
+
+<option>
+Сортировка
+</option>
+
+
+<option>
+По цене ↑
+</option>
+
+
+<option>
+По цене ↓
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+<ProductGrid
+
+:products="products"
+
+/>
+
+
+
+</main>
+
+
+</div>
+
+
+
+</div>
+
+
+</section>
+
 
 </template>
 
 
+
 <script setup>
 
-import { ref, onMounted } from "vue";
-import api from "@/api/api";
+
+import {ref,onMounted} from "vue";
+
+import axios from "axios";
+
+import ProductGrid from "@/components/shop/ProductGrid.vue";
+
 
 
 const products = ref([]);
 
 
-onMounted(async () => {
 
-    try {
+const loadProducts = async()=>{
 
-        const response = await api.get("/products");
 
-        products.value = response.data.products;
+try{
 
-        console.log(products.value);
 
-        console.log(products.value[0]);
+const response = await axios.get(
+"http://localhost:5263/api/products"
+);
 
-    }
-    catch (error) {
 
-        console.error(error);
 
-    }
+products.value=response.data.products;
+
+
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+
+
+}
+
+
+
+onMounted(()=>{
+
+loadProducts();
 
 });
 
@@ -87,129 +177,190 @@ onMounted(async () => {
 </script>
 
 
+
 <style scoped>
-.shop {
-
-    padding: 60px 0;
-
-}
 
 
-.shop h1 {
+.shop{
 
-    margin-bottom: 40px;
+padding:100px 0;
 
-    font-size: 42px;
+background:#f8fafc;
 
-}
-
-
-.shop-layout {
-
-    display: grid;
-
-    grid-template-columns: 300px 1fr;
-
-    gap: 40px;
-
-}
-
-
-.filters {
-
-    background: white;
-
-    border-radius: 20px;
-
-    padding: 25px;
-
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
-
-}
-
-
-.products {
-
-    display: grid;
-
-    grid-template-columns: repeat(3, 1fr);
-
-    gap: 25px;
-
-}
-
-
-.product-card {
-
-    background: white;
-
-    padding: 20px;
-
-    border-radius: 20px;
-
-    box-shadow: 0 10px 30px rgba(0, 0, 0, .05);
-
-}
-
-
-.product-card img {
-
-    width: 100%;
-
-    height: 180px;
-
-    object-fit: contain;
-
-}
-
-
-.product-card h3 {
-
-    margin-top: 15px;
-
-}
-
-
-.product-card strong {
-
-    display: block;
-
-    margin-top: 15px;
-
-    font-size: 22px;
-
-    color: #2563eb;
+min-height:100vh;
 
 }
 
 
 
-@media(max-width:1100px) {
+.container{
 
-    .shop-layout {
+max-width:1300px;
 
-        grid-template-columns: 1fr;
+margin:auto;
 
-    }
-
-
-    .products {
-
-        grid-template-columns: repeat(2, 1fr);
-
-    }
+padding:0 20px;
 
 }
 
 
 
-@media(max-width:700px) {
+.shop-header{
 
-    .products {
-
-        grid-template-columns: 1fr;
-
-    }
+margin-bottom:50px;
 
 }
+
+
+
+.shop-header h1{
+
+font-size:52px;
+
+font-weight:800;
+
+color:#0f172a;
+
+margin-bottom:15px;
+
+}
+
+
+
+.shop-header p{
+
+font-size:18px;
+
+color:#64748b;
+
+}
+
+
+
+
+.shop-layout{
+
+display:grid;
+
+grid-template-columns:300px 1fr;
+
+gap:40px;
+
+}
+
+
+
+
+.sidebar{
+
+
+position:sticky;
+
+top:20px;
+
+height:max-content;
+
+
+}
+
+
+
+.filter-placeholder{
+
+
+background:white;
+
+border-radius:24px;
+
+padding:25px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.08);
+
+}
+
+
+
+.filter-placeholder h2{
+
+font-size:26px;
+
+margin-bottom:15px;
+
+}
+
+
+
+.filter-placeholder p{
+
+color:#64748b;
+
+}
+
+
+
+
+
+.toolbar{
+
+
+background:white;
+
+border-radius:20px;
+
+padding:20px;
+
+margin-bottom:30px;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+}
+
+
+
+.toolbar select{
+
+
+padding:10px 15px;
+
+border-radius:12px;
+
+border:1px solid #ddd;
+
+}
+
+
+
+@media(max-width:900px){
+
+
+.shop-layout{
+
+grid-template-columns:1fr;
+
+}
+
+
+.sidebar{
+
+position:static;
+
+}
+
+
+.shop-header h1{
+
+font-size:38px;
+
+}
+
+
+}
+
+
+
 </style>
