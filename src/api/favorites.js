@@ -1,0 +1,13 @@
+import api from "./api";
+
+export function getFavorites() {
+    return api.get("/favorites");
+}
+
+export function addFavorite(productId) {
+    return api.post("/favorites", { productId });
+}
+
+export function removeFavorite(productId) {
+    return api.delete(`/favorites/${productId}`);
+}

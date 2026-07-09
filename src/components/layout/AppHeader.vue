@@ -1,206 +1,89 @@
 <template>
-  <header class="header">
-    <div class="container header-container">
 
-      <RouterLink to="/" class="logo">
-        <i class="fa-solid fa-screwdriver-wrench"></i>
-        <span>Servis53</span>
-      </RouterLink>
+    <header class="header">
 
-      <nav class="navigation">
-        <RouterLink to="/">Главная</RouterLink>
-        <RouterLink to="/services">Услуги</RouterLink>
-        <RouterLink to="/shop">Магазин</RouterLink>
-        <RouterLink to="/contacts">Контакты</RouterLink>
-      </nav>
+        <div class="container header-container">
 
-      <div class="header-actions">
+            <HeaderLogo />
 
-        <button class="icon-btn">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
+            <div class="desktop">
 
-        <button class="icon-btn">
-          <i class="fa-solid fa-cart-shopping"></i>
-        </button>
+                <HeaderNav />
 
-        <RouterLink class="login-btn" to="/login">
-          Войти
-        </RouterLink>
+                <HeaderSearch />
 
-      </div>
+                <HeaderActions />
 
-    </div>
-  </header>
+            </div>
+
+            <BurgerButton @toggle="menuOpen = true" />
+
+        </div>
+
+    </header>
+
+    <MobileMenu :open="menuOpen" @close="menuOpen = false" />
+
 </template>
 
 <script setup>
+
+import { ref } from "vue";
+
+import HeaderLogo from "./HeaderLogo.vue";
+import HeaderNav from "./HeaderNav.vue";
+import HeaderSearch from "./HeaderSearch.vue";
+import HeaderActions from "./HeaderActions.vue";
+
+import BurgerButton from "./BurgerButton.vue";
+import MobileMenu from "./MobileMenu.vue";
+
+const menuOpen = ref(false);
+
 </script>
 
 <style scoped>
+.header {
 
-.header{
+    position: sticky;
 
-    position:sticky;
+    top: 0;
 
-    top:0;
+    z-index: 1000;
 
-    z-index:1000;
+    background: rgba(255, 255, 255, .9);
 
-    background:rgba(255,255,255,.92);
+    backdrop-filter: blur(18px);
 
-    backdrop-filter:blur(18px);
-
-    border-bottom:1px solid #ececec;
-
-}
-
-.header-container{
-
-    height:82px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
+    border-bottom: 1px solid var(--border);
 
 }
 
-.logo{
+.header-container {
+    height: 72px;
 
-    display:flex;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-    align-items:center;
+.desktop {
 
-    gap:12px;
+    display: flex;
 
-    font-size:28px;
+    align-items: center;
 
-    font-weight:700;
-
-    color:#2563eb;
+    gap: 30px;
 
 }
 
-.logo i{
+@media(max-width:992px) {
 
-    font-size:26px;
+    .desktop {
 
-}
+        display: none;
 
-.navigation{
-
-    display:flex;
-
-    gap:38px;
+    }
 
 }
-
-.navigation a{
-
-    position:relative;
-
-    font-weight:500;
-
-    transition:.3s;
-
-}
-
-.navigation a:hover{
-
-    color:#2563eb;
-
-}
-
-.navigation a::after{
-
-    content:"";
-
-    position:absolute;
-
-    left:0;
-
-    bottom:-8px;
-
-    width:0;
-
-    height:2px;
-
-    background:#2563eb;
-
-    transition:.3s;
-
-}
-
-.navigation a:hover::after{
-
-    width:100%;
-
-}
-
-.header-actions{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
-
-}
-
-.icon-btn{
-
-    width:44px;
-
-    height:44px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#f4f4f4;
-
-    transition:.3s;
-
-}
-
-.icon-btn:hover{
-
-    background:#2563eb;
-
-    color:white;
-
-}
-
-.login-btn{
-
-    background:#2563eb;
-
-    color:white;
-
-    padding:13px 28px;
-
-    border-radius:12px;
-
-    transition:.3s;
-
-}
-
-.login-btn:hover{
-
-    background:#1d4ed8;
-
-}
-
-@media(max-width:900px){
-
-.navigation{
-
-display:none;
-
-}
-
-}
-
 </style>
