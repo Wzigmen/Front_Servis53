@@ -25,3 +25,68 @@
 .btn:hover{
     transform:translateY(-2px);
 }
+
+body{
+
+    margin:0;
+
+    font-family:Inter,sans-serif;
+
+    background:
+        radial-gradient(circle at top left,#2b73ff22,transparent 35%),
+        radial-gradient(circle at bottom right,#53d7ff22,transparent 40%),
+        linear-gradient(135deg,#f8fbff,#eef6ff);
+
+    background-attachment:fixed;
+
+}
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    width:800px;
+
+    height:800px;
+
+    left:-250px;
+
+    top:-250px;
+
+    border-radius:50%;
+
+    background:#2563eb;
+
+    filter:blur(180px);
+
+    opacity:.12;
+
+    z-index:-10;
+
+}
+body::after{
+
+    content:"";
+
+    position:fixed;
+
+    width:700px;
+
+    height:700px;
+
+    right:-200px;
+
+    bottom:-200px;
+
+    border-radius:50%;
+
+    background:#4fd7ff;
+
+    filter:blur(180px);
+
+    opacity:.12;
+
+    z-index:-10;
+
+}

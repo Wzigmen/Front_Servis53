@@ -1,69 +1,61 @@
 <template>
-  <header
-    class="header"
-    :class="{ scrolled: isScrolled }"
->
-    <div class="container header-container">
+    <header class="header" :class="{ scrolled: isScrolled }">
+        <div class="container header-container">
 
-      <!-- Логотип -->
-      <RouterLink to="/" class="logo">
-        <span class="logo-icon">⚡</span>
-        <span class="logo-text">Servis53</span>
-      </RouterLink>
+            <!-- Логотип -->
+            <RouterLink to="/" class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">Servis53</span>
+            </RouterLink>
 
-      <!-- Навигация -->
-      <nav class="nav">
-        <RouterLink to="/">Главная</RouterLink>
-        <RouterLink to="/services">Услуги</RouterLink>
-        <RouterLink to="/shop">Магазин</RouterLink>
-        <RouterLink to="/contacts">Контакты</RouterLink>
-      </nav>
+            <!-- Навигация -->
+            <nav class="nav">
+                <RouterLink to="/">Главная</RouterLink>
+                <RouterLink to="/services">Услуги</RouterLink>
+                <RouterLink to="/shop">Магазин</RouterLink>
+                <RouterLink to="/contacts">Контакты</RouterLink>
+            </nav>
 
-      <!-- Правая часть -->
-      <div class="actions">
+            <!-- Правая часть -->
+            <div class="actions">
 
-        <button class="icon-btn">
-          <Search :size="20" />
-        </button>
+                <button class="icon-btn">
+                    <Search :size="20" />
+                </button>
 
-        <button class="icon-btn">
-          <Heart :size="20" />
-        </button>
+                <button class="icon-btn">
+                    <Heart :size="20" />
+                </button>
 
-        <button class="icon-btn">
-          <ShoppingCart :size="20" />
-        </button>
+                <button class="icon-btn">
+                    <ShoppingCart :size="20" />
+                </button>
 
-        <RouterLink
-          v-if="!auth.isAuthenticated"
-          to="/login"
-          class="login-btn"
-        >
-          Войти
-        </RouterLink>
+                <button v-if="!auth.isAuthenticated" class="login-btn" @click="showLogin = true">
 
-        <RouterLink
-          v-else
-          to="/profile"
-          class="profile-btn"
-        >
-          <User :size="18" />
-          {{ auth.user?.fullName }}
-        </RouterLink>
+                    Войти
 
-      </div>
+                </button>
 
-    </div>
-  </header>
+                <RouterLink v-else to="/profile" class="profile-btn">
+                    <User :size="18" />
+                    {{ auth.user?.fullName }}
+                </RouterLink>
+
+            </div>
+        </div>
+    </header>
+    <LoginModal v-if="showLogin" @close="showLogin = false" />
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import { Search, Heart, ShoppingCart, User } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth";
+import LoginModal from "@/components/auth/LoginModal.vue";
 
 const auth = useAuthStore();
-
+const showLogin = ref(false);
 const isScrolled = ref(false);
 
 const handleScroll = () => {
@@ -80,177 +72,180 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.header {
 
-.header{
+    position: sticky;
+    top: 0;
 
-    position:sticky;
-    top:0;
+    z-index: 1000;
 
-    z-index:1000;
+    background: rgba(255, 255, 255, .85);
 
-    background:rgba(255,255,255,.85);
+    backdrop-filter: blur(18px);
 
-    backdrop-filter:blur(18px);
-
-    border-bottom:1px solid var(--border);
-
-}
-
-.header-container{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:space-between;
-
-    height:80px;
+    border-bottom: 1px solid var(--border);
 
 }
 
-.logo{
+.header-container {
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    gap:10px;
+    justify-content: space-between;
 
-    font-size:24px;
-
-    font-weight:800;
+    height: 80px;
 
 }
 
-.logo-icon{
+.logo {
 
-    color:var(--primary);
+    display: flex;
 
-}
+    align-items: center;
 
-.logo-text{
+    gap: 10px;
 
-    color:var(--text);
+    font-size: 24px;
 
-}
-
-.nav{
-
-    display:flex;
-
-    gap:36px;
+    font-weight: 800;
 
 }
 
-.nav a{
+.logo-icon {
 
-    position:relative;
-
-    color:var(--text-light);
-
-    font-weight:500;
-
-    transition:.3s;
+    color: var(--primary);
 
 }
 
-.nav a::after{
+.logo-text {
 
-    content:"";
-
-    position:absolute;
-
-    left:0;
-
-    bottom:-8px;
-
-    width:0;
-
-    height:3px;
-
-    border-radius:999px;
-
-    background:var(--primary);
-
-    transition:.3s;
+    color: var(--text);
 
 }
 
-.nav a:hover{
+.nav {
 
-    color:var(--text);
+    display: flex;
 
-}
-
-.nav a:hover::after{
-
-    width:100%;
+    gap: 36px;
 
 }
 
-.router-link-active{
+.nav a {
 
-    color:var(--primary)!important;
+    position: relative;
 
-}
+    color: var(--text-light);
 
-.router-link-active::after{
+    font-weight: 500;
 
-    width:100%!important;
-
-}
-
-.actions{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:12px;
+    transition: .3s;
 
 }
 
-.icon-btn{
+.nav a::after {
 
-    width:42px;
+    content: "";
 
-    height:42px;
+    position: absolute;
 
-    border-radius:50%;
+    left: 0;
 
-    background:white;
+    bottom: -8px;
 
-    border:1px solid var(--border);
+    width: 0;
 
-    display:flex;
+    height: 3px;
 
-    align-items:center;
+    border-radius: 999px;
 
-    justify-content:center;
+    background: var(--primary);
 
-    transition:.3s;
+    transition: .3s;
 
 }
 
-.icon-btn:hover{
+.nav a:hover {
 
-    transform:translateY(-2px);
+    color: var(--text);
 
-    box-shadow:var(--shadow-sm);
+}
+
+.nav a:hover::after {
+
+    width: 100%;
+
+}
+
+.router-link-active {
+
+    color: var(--primary) !important;
+
+}
+
+.router-link-active::after {
+
+    width: 100% !important;
+
+}
+
+.actions {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+}
+
+.icon-btn {
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    border: 1px solid var(--border);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    transition: .3s;
+
+}
+
+.icon-btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: var(--shadow-sm);
 
 }
 
 .login-btn{
 
-    padding:12px 24px;
+    padding:12px 26px;
 
-    border-radius:var(--radius-md);
+    border:none;
 
-    background:var(--primary);
+    border-radius:999px;
+
+    background:linear-gradient(135deg,#2563eb,#4f8cff);
 
     color:white;
 
-    font-weight:600;
+    font-weight:700;
+
+    cursor:pointer;
 
     transition:.3s;
 
@@ -258,56 +253,59 @@ onUnmounted(() => {
 
 .login-btn:hover{
 
-    background:var(--primary-hover);
+    transform:translateY(-2px);
+
+    box-shadow:0 15px 35px rgba(37,99,235,.35);
 
 }
 
-.profile-btn{
+.profile-btn {
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    gap:8px;
+    gap: 8px;
 
-    padding:10px 18px;
+    padding: 10px 18px;
 
-    border-radius:999px;
+    border-radius: 999px;
 
-    background:white;
+    background: white;
 
-    border:1px solid var(--border);
+    border: 1px solid var(--border);
 
 }
-.header{
+
+.header {
     transition: all .35s ease;
 }
 
-.header-container{
+.header-container {
     transition: all .35s ease;
 }
 
-.logo{
+.logo {
     transition: all .35s ease;
 }
 
-.scrolled{
+.scrolled {
 
-    background:rgba(255,255,255,.96);
+    background: rgba(255, 255, 255, .96);
 
-    box-shadow:0 10px 40px rgba(0,0,0,.08);
-
-}
-
-.scrolled .header-container{
-
-    height:64px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .08);
 
 }
 
-.scrolled .logo{
+.scrolled .header-container {
 
-    font-size:21px;
+    height: 64px;
+
+}
+
+.scrolled .logo {
+
+    font-size: 21px;
 
 }
 </style>

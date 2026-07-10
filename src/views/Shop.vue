@@ -1,299 +1,408 @@
 <template>
+    <div class="shop-page">
 
-<section class="shop">
+        <!-- Заголовок -->
+        <section class="shop-header">
+
+            <h1>
+                Магазин техники
+            </h1>
+
+            <p>
+                Телефоны, ноутбуки, компьютеры и аксессуары
+            </p>
+
+        </section>
 
 
-<div class="container">
+
+        <div class="shop-container">
 
 
-<!-- Заголовок -->
+            <!-- Левая часть - фильтры -->
+            <aside class="filters">
 
-<div class="shop-header">
 
-    <div>
+                <h3>
+                    Фильтры
+                </h3>
 
-        <h1>
-            Каталог техники
-        </h1>
+                <div class="filter-block">
 
-        <p>
-            Телефоны, ноутбуки, компьютеры и аксессуары
-        </p>
+                    <input class="search-input" placeholder="Поиск..." v-model="filters.search">
+
+                </div>
+                <div class="filter-block">
+
+    <h4>Категории</h4>
+
+    <div class="chips">
+
+        <button
+            class="chip"
+            :class="{active:filters.categoryId===null}"
+            @click="filters.categoryId=null"
+        >
+            Все
+        </button>
+
+        <button
+            v-for="category in categories"
+            :key="category.id"
+            class="chip"
+            :class="{active:filters.categoryId===category.id}"
+            @click="filters.categoryId=category.id"
+        >
+            {{ category.name }}
+        </button>
 
     </div>
 
+</div>
+
+                <div class="filter-block">
+
+    <h4>Бренды</h4>
+
+    <div class="chips">
+
+        <button
+            class="chip"
+            :class="{active:filters.brandId===null}"
+            @click="filters.brandId=null"
+        >
+            Все
+        </button>
+
+        <button
+            v-for="brand in brands"
+            :key="brand.id"
+            class="chip"
+            :class="{active:filters.brandId===brand.id}"
+            @click="filters.brandId=brand.id"
+        >
+            {{ brand.name }}
+        </button>
+
+    </div>
 
 </div>
 
 
+                <div class="filter-block">
 
-<!-- Панель магазина -->
+                    <h4>Цена</h4>
 
-<div class="shop-layout">
+                    <input type="number" placeholder="От" v-model="filters.minPrice">
 
+                    <input type="number" placeholder="До" v-model="filters.maxPrice">
 
-<!-- Левая часть -->
+                </div>
 
-<aside class="sidebar">
+                <button class="filter-button reset-button" @click="resetFilters">
+                    Сбросить
+                </button>
 
-
-<div class="filter-placeholder">
-
-    <h2>
-        Фильтры
-    </h2>
-
-
-    <p>
-        Здесь будут фильтры
-    </p>
-
-</div>
-
-
-</aside>
+            </aside>
 
 
 
 
-<!-- Правая часть -->
 
-<main class="products-area">
-
-
-
-<div class="toolbar">
+            <!-- Правая часть -->
+            <main class="products">
 
 
-<span>
+                <div class="products-top">
 
-Найдено товаров: {{ products.length }}
 
-</span>
+                    <h2>
+                        Товары
+                    </h2>
 
 
 
-<select>
+                    <select>
 
-<option>
-Сортировка
-</option>
+                        <option>
+                            Популярные
+                        </option>
 
+                        <option>
+                            Дешевле
+                        </option>
 
-<option>
-По цене ↑
-</option>
+                        <option>
+                            Дороже
+                        </option>
 
-
-<option>
-По цене ↓
-</option>
-
-
-</select>
+                    </select>
 
 
-</div>
+                </div>
 
 
 
+                <!-- Тут потом будет ProductGrid -->
 
-<ProductGrid
+                <div class="products-grid">
 
-:products="products"
+                    <ProductCard v-for="product in products" :key="product.id" :product="product" />
 
-/>
-
-
-
-</main>
+                </div>
 
 
-</div>
+            </main>
 
 
-
-</div>
-
-
-</section>
+        </div>
 
 
+    </div>
 </template>
 
 
 
 <script setup>
-
-
-import {ref,onMounted} from "vue";
-
-import axios from "axios";
-
-import ProductGrid from "@/components/shop/ProductGrid.vue";
-
+import ProductCard from "@/components/shop/ProductCard.vue";
+import { ref, onMounted, watch } from "vue";
+import api from "@/api/api";
 
 
 const products = ref([]);
+const categories = ref([]);
+const brands = ref([]);
+const total = ref(0);
+const loading = ref(false);
 
-
-
-const loadProducts = async()=>{
-
-
-try{
-
-
-const response = await axios.get(
-"http://localhost:5263/api/products"
-);
-
-
-
-products.value=response.data.products;
-
-
-
-}
-
-catch(error){
-
-console.log(error);
-
-}
-
-
-}
-
-
-
-onMounted(()=>{
-
-loadProducts();
-
+const filters = ref({
+    search: "",
+    categoryId: null,
+    brandId: null,
+    minPrice: null,
+    maxPrice: null,
+    sort: "",
+    page: 1,
+    pageSize: 12
 });
 
+async function loadProducts() {
+    loading.value = true;
+    try {
+        const { data } = await api.get("/products", { params: filters.value });
+        products.value = data.products;
+        total.value = data.total;
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        loading.value = false;
+    }
+}
 
+async function loadCategories() {
+    try {
+        const { data } = await api.get("/categories");
+        categories.value = data;
+    }
+    catch (err) {
+        console.error(err);
+    }
+}
+
+async function loadBrands() {
+    try {
+        const { data } = await api.get("/brands");
+        brands.value = data;
+    }
+    catch (err) {
+        console.error(err);
+    }
+}
+
+function resetFilters() {
+    filters.value = {
+        search: "",
+        categoryId: null,
+        brandId: null,
+        minPrice: null,
+        maxPrice: null,
+        sort: "",
+        page: 1,
+        pageSize: 12
+    };
+}
+
+function imageUrl(product) {
+    if (!product.images || product.images.length === 0)
+        return null;
+
+    return `http://localhost:5263/images/products/${product.id}/${product.images[0]}`;
+}
+
+watch(filters, () => {
+    loadProducts();
+}, { deep: true });
+
+onMounted(async () => {
+    await Promise.all([
+        loadCategories(),
+        loadBrands()
+    ]);
+
+    await loadProducts();
+});
 </script>
 
 
-
 <style scoped>
+.shop-page {
 
+    padding: 40px;
 
-.shop{
+    background:transparent;
 
-padding:100px 0;
-
-background:#f8fafc;
-
-min-height:100vh;
+    min-height: 100vh;
 
 }
 
 
 
-.container{
+.shop-header {
 
-max-width:1300px;
+    margin-bottom: 35px;
 
-margin:auto;
+}
 
-padding:0 20px;
+
+.shop-header h1 {
+
+    font-size: 36px;
+
+    font-weight: 700;
 
 }
 
 
 
-.shop-header{
+.shop-header p {
 
-margin-bottom:50px;
-
-}
-
-
-
-.shop-header h1{
-
-font-size:52px;
-
-font-weight:800;
-
-color:#0f172a;
-
-margin-bottom:15px;
-
-}
-
-
-
-.shop-header p{
-
-font-size:18px;
-
-color:#64748b;
+    color: #777;
 
 }
 
 
 
 
-.shop-layout{
+.shop-container {
 
-display:grid;
+    display: flex;
 
-grid-template-columns:300px 1fr;
+    gap: 30px;
 
-gap:40px;
+}
+
+.search-input{
+    width:100%;
+    padding:3px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    outline:none;
+    transition:.2s;
+}
+
+.search-input:focus{
+    border-color:#2563eb;
+}
+
+/* Фильтры */
+
+
+.filters {
+
+    width: 260px;
+
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 18px;
+
+    height: fit-content;
+
+}
+
+
+
+.filters h3 {
+
+    margin-bottom: 20px;
+
+}
+
+
+
+.filter-block {
+
+    margin-bottom: 25px;
+
+}
+
+
+
+.filter-block h4 {
+
+    margin-bottom: 12px;
+
+}
+
+
+
+.filter-block label {
+
+    display: block;
+
+    margin-bottom: 10px;
+
+    cursor: pointer;
+
+}
+
+
+
+.filter-block input[type="number"] {
+
+    width: 100%;
+
+    padding: 10px;
+
+    margin-bottom: 10px;
+
+    border-radius: 10px;
+
+    border: 1px solid #ddd;
 
 }
 
 
 
 
-.sidebar{
+.filter-button {
 
+    width: 100%;
 
-position:sticky;
+    padding: 12px;
 
-top:20px;
+    border: none;
 
-height:max-content;
+    border-radius: 12px;
 
+    background: #2563eb;
 
-}
+    color: white;
 
-
-
-.filter-placeholder{
-
-
-background:white;
-
-border-radius:24px;
-
-padding:25px;
-
-box-shadow:
-0 10px 30px rgba(0,0,0,.08);
-
-}
-
-
-
-.filter-placeholder h2{
-
-font-size:26px;
-
-margin-bottom:15px;
-
-}
-
-
-
-.filter-placeholder p{
-
-color:#64748b;
+    cursor: pointer;
 
 }
 
@@ -301,66 +410,140 @@ color:#64748b;
 
 
 
-.toolbar{
+/* Товары */
 
 
-background:white;
+.products {
 
-border-radius:20px;
-
-padding:20px;
-
-margin-bottom:30px;
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
+    flex: 1;
 
 }
 
 
 
-.toolbar select{
+.products-top {
 
+    background: white;
 
-padding:10px 15px;
+    padding: 20px;
 
-border-radius:12px;
+    border-radius: 18px;
 
-border:1px solid #ddd;
+    display: flex;
 
-}
+    justify-content: space-between;
 
+    align-items: center;
 
-
-@media(max-width:900px){
-
-
-.shop-layout{
-
-grid-template-columns:1fr;
+    margin-bottom: 25px;
 
 }
 
 
-.sidebar{
 
-position:static;
+.products-top select {
 
-}
+    padding: 10px;
 
-
-.shop-header h1{
-
-font-size:38px;
+    border-radius: 10px;
 
 }
 
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+}
 
+@media(max-width:1500px) {
+    .products-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media(max-width:1100px) {
+    .products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media(max-width:700px) {
+    .products-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
 }
 
 
+.empty-products {
+
+    background: white;
+
+    min-height: 300px;
+
+    border-radius: 18px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    color: #999;
+
+    font-size: 20px;
+
+}
+
+.chips{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    gap:10px;
+
+}
+
+.chip{
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    border:1px solid #d8dbe2;
+
+    background:white;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    font-size:14px;
+
+    font-weight:600;
+
+}
+
+.chip:hover{
+
+    border-color:#2563eb;
+
+    color:#2563eb;
+
+    transform:translateY(-2px);
+
+}
+
+.chip.active{
+
+    background:#2563eb;
+
+    color:white;
+
+    border-color:#2563eb;
+
+    box-shadow:0 5px 18px rgba(37,99,235,.35);
+
+}
 
 </style>

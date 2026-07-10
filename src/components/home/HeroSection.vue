@@ -41,12 +41,12 @@
                 <div class="hero-buttons">
 
 
-                    <button class="main-btn">
+                    <button class="main-btn" to="/contacts">
                         Оставить заявку
                     </button>
 
 
-                    <button class="second-btn">
+                    <button class="second-btn" to="/shop">
                         Каталог
                     </button>
 
