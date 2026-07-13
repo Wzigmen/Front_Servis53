@@ -1,5 +1,5 @@
 <template>
-    <div class="card" ref="card" @mousemove="move" @mouseleave="leave">
+    <div class="card" ref="card" @mousemove="move" @mouseleave="leave" @click="openProduct">
 
         <div class="glare" :style="glareStyle"></div>
 
@@ -50,6 +50,10 @@
 
 <script setup>
 import { computed, ref } from "vue";
+import { useRouter } from "vue-router";
+
+
+const router = useRouter();
 const props = defineProps({
     product: Object
 });
@@ -60,14 +64,17 @@ const glareStyle = ref({});
 const freeze = ref(false);
 
 const image = computed(() => {
-
+    
     if (!props.product.images || props.product.images.length === 0)
-        return null;
+    return null;
 
-    return `http://localhost:5263/images/products/${props.product.id}/${props.product.images[0]}`;
+return `http://localhost:5263/images/products/${props.product.id}/${props.product.images[0]}`;
 
 });
 
+function openProduct() {
+    router.push(`/product/${props.product.id}`);
+}
 function move(){
 
     if(freeze.value)
@@ -297,4 +304,5 @@ button:hover {
     }
 
 }
+
 </style>

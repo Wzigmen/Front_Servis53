@@ -34,59 +34,42 @@
                 </div>
                 <div class="filter-block">
 
-    <h4>Категории</h4>
+                    <h4>Категории</h4>
 
-    <div class="chips">
+                    <div class="chips">
 
-        <button
-            class="chip"
-            :class="{active:filters.categoryId===null}"
-            @click="filters.categoryId=null"
-        >
-            Все
-        </button>
+                        <button class="chip" :class="{ active: filters.categoryId === null }"
+                            @click="filters.categoryId = null">
+                            Все
+                        </button>
 
-        <button
-            v-for="category in categories"
-            :key="category.id"
-            class="chip"
-            :class="{active:filters.categoryId===category.id}"
-            @click="filters.categoryId=category.id"
-        >
-            {{ category.name }}
-        </button>
+                        <button v-for="category in categories" :key="category.id" class="chip"
+                            :class="{ active: filters.categoryId === category.id }" @click="filters.categoryId = category.id">
+                            {{ category.name }}
+                        </button>
 
-    </div>
+                    </div>
 
-</div>
+                </div>
 
                 <div class="filter-block">
 
-    <h4>Бренды</h4>
+                    <h4>Бренды</h4>
 
-    <div class="chips">
+                    <div class="chips">
 
-        <button
-            class="chip"
-            :class="{active:filters.brandId===null}"
-            @click="filters.brandId=null"
-        >
-            Все
-        </button>
+                        <button class="chip" :class="{ active: filters.brandId === null }" @click="filters.brandId = null">
+                            Все
+                        </button>
 
-        <button
-            v-for="brand in brands"
-            :key="brand.id"
-            class="chip"
-            :class="{active:filters.brandId===brand.id}"
-            @click="filters.brandId=brand.id"
-        >
-            {{ brand.name }}
-        </button>
+                        <button v-for="brand in brands" :key="brand.id" class="chip"
+                            :class="{ active: filters.brandId === brand.id }" @click="filters.brandId = brand.id">
+                            {{ brand.name }}
+                        </button>
 
-    </div>
+                    </div>
 
-</div>
+                </div>
 
 
                 <div class="filter-block">
@@ -112,33 +95,22 @@
             <!-- Правая часть -->
             <main class="products">
 
-
                 <div class="products-top">
-
-
-                    <h2>
-                        Товары
-                    </h2>
-
-
-
-                    <select>
-
-                        <option>
-                            Популярные
+                    <select v-model="filters.sort">
+                        
+                        <option value="">
+                            По умолчанию
                         </option>
-
-                        <option>
-                            Дешевле
+                        
+                        <option value="priceAsc">
+                            Сначала дешевле
                         </option>
-
-                        <option>
-                            Дороже
+                        
+                        <option value="priceDesc">
+                            Сначала дороже
                         </option>
-
+                        
                     </select>
-
-
                 </div>
 
 
@@ -261,7 +233,7 @@ onMounted(async () => {
 
     padding: 40px;
 
-    background:transparent;
+    background: transparent;
 
     min-height: 100vh;
 
@@ -303,22 +275,20 @@ onMounted(async () => {
 
 }
 
-.search-input{
-    width:100%;
-    padding:3px;
-    border:1px solid #ddd;
-    border-radius:10px;
-    outline:none;
-    transition:.2s;
+.search-input {
+    width: 100%;
+    padding: 3px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    outline: none;
+    transition: .2s;
 }
 
-.search-input:focus{
-    border-color:#2563eb;
+.search-input:focus {
+    border-color: #2563eb;
 }
 
 /* Фильтры */
-
-
 .filters {
 
     width: 260px;
@@ -333,15 +303,11 @@ onMounted(async () => {
 
 }
 
-
-
 .filters h3 {
 
     margin-bottom: 20px;
 
 }
-
-
 
 .filter-block {
 
@@ -349,15 +315,11 @@ onMounted(async () => {
 
 }
 
-
-
 .filter-block h4 {
 
     margin-bottom: 12px;
 
 }
-
-
 
 .filter-block label {
 
@@ -368,8 +330,6 @@ onMounted(async () => {
     cursor: pointer;
 
 }
-
-
 
 .filter-block input[type="number"] {
 
@@ -384,9 +344,6 @@ onMounted(async () => {
     border: 1px solid #ddd;
 
 }
-
-
-
 
 .filter-button {
 
@@ -406,13 +363,7 @@ onMounted(async () => {
 
 }
 
-
-
-
-
 /* Товары */
-
-
 .products {
 
     flex: 1;
@@ -439,13 +390,29 @@ onMounted(async () => {
 
 }
 
+.products-top select{
 
+    padding:12px 18px;
 
-.products-top select {
+    border:none;
 
-    padding: 10px;
+    outline:none;
 
-    border-radius: 10px;
+    border-radius:14px;
+
+    background:white;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.06);
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.products-top select:hover{
+
+    transform:translateY(-2px);
 
 }
 
@@ -494,56 +461,55 @@ onMounted(async () => {
 
 }
 
-.chips{
+.chips {
 
-    display:flex;
+    display: flex;
 
-    flex-wrap:wrap;
+    flex-wrap: wrap;
 
-    gap:10px;
-
-}
-
-.chip{
-
-    padding:8px 14px;
-
-    border-radius:999px;
-
-    border:1px solid #d8dbe2;
-
-    background:white;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    font-size:14px;
-
-    font-weight:600;
+    gap: 10px;
 
 }
 
-.chip:hover{
+.chip {
 
-    border-color:#2563eb;
+    padding: 8px 14px;
 
-    color:#2563eb;
+    border-radius: 999px;
 
-    transform:translateY(-2px);
+    border: 1px solid #d8dbe2;
 
-}
+    background: white;
 
-.chip.active{
+    cursor: pointer;
 
-    background:#2563eb;
+    transition: .25s;
 
-    color:white;
+    font-size: 14px;
 
-    border-color:#2563eb;
-
-    box-shadow:0 5px 18px rgba(37,99,235,.35);
+    font-weight: 600;
 
 }
 
+.chip:hover {
+
+    border-color: #2563eb;
+
+    color: #2563eb;
+
+    transform: translateY(-2px);
+
+}
+
+.chip.active {
+
+    background: #2563eb;
+
+    color: white;
+
+    border-color: #2563eb;
+
+    box-shadow: 0 5px 18px rgba(37, 99, 235, .35);
+
+}
 </style>

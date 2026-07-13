@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { login, register, getMe } from "@/api/auth";
+import AdminView from "@/views/Admin/AdminView.vue";
 
 export const useAuthStore = defineStore("auth", {
 
@@ -52,7 +53,8 @@ export const useAuthStore = defineStore("auth", {
 
             localStorage.removeItem("token");
 
-        }
+        },
+        
 
     }
 

@@ -7,7 +7,11 @@
                 <span class="logo-icon">⚡</span>
                 <span class="logo-text">Servis53</span>
             </RouterLink>
+            <RouterLink v-if="auth.user?.role === 'Admin'" to="/admin" class="admin-btn">
 
+                Админ
+
+            </RouterLink>
             <!-- Навигация -->
             <nav class="nav">
                 <RouterLink to="/">Главная</RouterLink>
@@ -72,6 +76,28 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.admin-btn{
+
+    padding:12px 22px;
+
+    border-radius:14px;
+
+    background:#111827;
+
+    color:white;
+
+    font-weight:700;
+
+    transition:.3s;
+
+}
+
+.admin-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
 .header {
 
     position: sticky;
@@ -231,31 +257,31 @@ onUnmounted(() => {
 
 }
 
-.login-btn{
+.login-btn {
 
-    padding:12px 26px;
+    padding: 12px 26px;
 
-    border:none;
+    border: none;
 
-    border-radius:999px;
+    border-radius: 999px;
 
-    background:linear-gradient(135deg,#2563eb,#4f8cff);
+    background: linear-gradient(135deg, #2563eb, #4f8cff);
 
-    color:white;
+    color: white;
 
-    font-weight:700;
+    font-weight: 700;
 
-    cursor:pointer;
+    cursor: pointer;
 
-    transition:.3s;
+    transition: .3s;
 
 }
 
-.login-btn:hover{
+.login-btn:hover {
 
-    transform:translateY(-2px);
+    transform: translateY(-2px);
 
-    box-shadow:0 15px 35px rgba(37,99,235,.35);
+    box-shadow: 0 15px 35px rgba(37, 99, 235, .35);
 
 }
 

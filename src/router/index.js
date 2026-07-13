@@ -6,6 +6,7 @@ import Shop from "@/views/Shop.vue";
 import Contacts from "@/views/Contacts.vue";
 import Profile from "@/views/Profile.vue";
 import Login from "@/views/Login.vue";
+import AdminView from "@/views/Admin/AdminView.vue";
 
 import { useAuthStore } from "@/stores/auth";
 
@@ -44,6 +45,20 @@ const routes = [
     name: "Login",
     component: Login,
   },
+  {
+    path: "/admin",
+    name: "Admin",
+    component: AdminView,
+    meta: {
+      requiresAuth: true,
+      isAdmin: true,
+    },
+  },
+  {
+    path: "/product/:id",
+    name: "product",
+    component: () => import("@/views/ProductView.vue"),
+  },
 ];
 
 // Потом создаем router
@@ -55,16 +70,21 @@ const router = createRouter({
   },
 });
 
-// Потом навешиваем защиту
-router.beforeEach((to) => {
-  const auth = useAuthStore();
+router.beforeEach(async (to) => {
 
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return {
-      name: "Login",
-    };
-  }
+    const auth = useAuthStore();
+
+    if (to.meta.requiresAuth && !auth.isAuthenticated)
+        return "/login";
+
+    if (
+        to.meta.requiresAdmin &&
+        auth.user?.role !== "Admin"
+    )
+    {
+        return "/";
+    }
+
 });
-
 // И только потом экспортируем
 export default router;
