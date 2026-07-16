@@ -1,89 +1,109 @@
 <template>
-<div class="overlay" @click="$emit('close')">
+    <div class="overlay" @click="$emit('close')">
 
-    <div class="modal" @click.stop>
+        <div class="modal" @click.stop>
 
-        <div class="icon">
-            👤
-        </div>
+            <div class="icon">
+                👤
+            </div>
 
-        <h2>
-            Добро пожаловать
-        </h2>
+            <h2>
+                Добро пожаловать
+            </h2>
 
-        <p>
-            Войдите в свой аккаунт
-        </p>
+            <p>
+                Войдите в свой аккаунт
+            </p>
 
-        <input
-            v-model="login"
-            placeholder="Логин"
-        >
+            <input v-if="isRegister" v-model="fullName" placeholder="Имя" />
 
-        <input
-            v-model="password"
-            type="password"
-            placeholder="Пароль"
-        >
+            <input v-if="isRegister" v-model="email" placeholder="Email" />
 
-        <label class="remember">
+            <input v-model="login" placeholder="Логин" />
 
-            <input type="checkbox">
+            <input v-model="password" type="password" placeholder="Пароль" />
 
-            Запомнить меня
+            <button @click="isRegister ? registerUser() : loginUser()" :disabled="loading">
 
-        </label>
+                {{ loading
+                    ? "Подождите..."
+                    : isRegister
+                        ? "Создать аккаунт"
+                        : "Войти"
+                }}
 
-        <button
-            @click="loginUser"
-            :disabled="loading"
-        >
+            </button>
+            <div class="switch">
 
-            {{ loading ? "Вход..." : "Войти" }}
+                <span v-if="!isRegister">
 
-        </button>
+                    Нет аккаунта?
 
-        <div
-            v-if="error"
-            class="error"
-        >
-            {{ error }}
+                    <a @click="isRegister = true">
+
+                        Зарегистрироваться
+
+                    </a>
+
+                </span>
+
+                <span v-else>
+
+                    Уже есть аккаунт?
+
+                    <a @click="isRegister = false">
+
+                        Войти
+
+                    </a>
+
+                </span>
+
+            </div>
+            <div v-if="error" class="error">
+                {{ error }}
+            </div>
+
         </div>
 
     </div>
-
-</div>
 </template>
 
 <script setup>
-import {ref} from "vue";
-import {useAuthStore} from "@/stores/auth";
+import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
 
-const emit=defineEmits(["close"]);
+const emit = defineEmits(["close"]);
 
-const auth=useAuthStore();
+const auth = useAuthStore();
 
-const login=ref("");
+const login = ref("");
 
-const password=ref("");
+const password = ref("");
 
-const loading=ref(false);
+const loading = ref(false);
 
-const error=ref("");
+const error = ref("");
 
-async function loginUser(){
+const isRegister = ref(false);
 
-    loading.value=true;
+const email = ref("");
 
-    error.value="";
+const fullName = ref("");
 
-    try{
+async function loginUser() {
+
+    loading.value = true;
+
+    error.value = "";
+
+    try {
 
         await auth.login({
 
-            login:login.value,
+            login: login.value,
 
-            password:password.value
+            password: password.value
 
         });
 
@@ -91,15 +111,66 @@ async function loginUser(){
 
     }
 
-    catch{
+    catch {
 
-        error.value="Неверный логин или пароль";
+        error.value = "Неверный логин или пароль";
 
     }
 
-    finally{
+    finally {
 
-        loading.value=false;
+        loading.value = false;
+
+    }
+
+}
+async function registerUser() {
+
+    loading.value = true;
+
+    error.value = "";
+
+    try {
+
+        await auth.register({
+
+            login: login.value,
+
+            password: password.value,
+
+            email: email.value,
+
+            fullName: fullName.value
+
+        });
+
+        await auth.login({
+
+            login: login.value,
+
+            password: password.value
+
+        });
+
+        emit("close");
+
+        isRegister.value = false;
+
+        error.value = "Аккаунт успешно создан! Теперь войдите.";
+
+        password.value = "";
+
+    }
+
+    catch {
+
+        error.value = "Не удалось зарегистрироваться";
+
+    }
+
+    finally {
+
+        loading.value = false;
 
     }
 
@@ -107,201 +178,219 @@ async function loginUser(){
 </script>
 
 <style scoped>
+.overlay {
 
-.overlay{
+    position: fixed;
 
-    position:fixed;
+    inset: 0;
 
-    inset:0;
+    background: rgba(0, 0, 0, .35);
 
-    background:rgba(0,0,0,.35);
+    backdrop-filter: blur(8px);
 
-    backdrop-filter:blur(8px);
+    display: flex;
 
-    display:flex;
+    justify-content: center;
 
-    justify-content:center;
+    align-items: center;
 
-    align-items:center;
+    z-index: 9999;
 
-    z-index:9999;
-
-    animation:fade .25s;
-
-}
-
-.modal{
-
-    width:420px;
-
-    background:white;
-
-    border-radius:26px;
-
-    padding:40px;
-
-    box-shadow:0 30px 70px rgba(0,0,0,.18);
-
-    animation:popup .3s;
+    animation: fade .25s;
 
 }
 
-.icon{
+.modal {
 
-    width:90px;
+    width: 420px;
 
-    height:90px;
+    background: white;
 
-    margin:auto;
+    border-radius: 26px;
 
-    border-radius:50%;
+    padding: 40px;
 
-    background:#edf5ff;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, .18);
 
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    font-size:40px;
-
-    margin-bottom:20px;
+    animation: popup .3s;
 
 }
 
-h2{
+.icon {
 
-    text-align:center;
+    width: 90px;
 
-    margin-bottom:5px;
+    height: 90px;
 
-}
+    margin: auto;
 
-p{
+    border-radius: 50%;
 
-    text-align:center;
+    background: #edf5ff;
 
-    color:#777;
+    display: flex;
 
-    margin-bottom:30px;
+    justify-content: center;
 
-}
+    align-items: center;
 
-input{
+    font-size: 40px;
 
-    width:100%;
-
-    box-sizing:border-box;
-
-    margin-bottom:15px;
-
-    padding:15px;
-
-    border-radius:14px;
-
-    border:1px solid #ddd;
-
-    outline:none;
-
-    transition:.2s;
+    margin-bottom: 20px;
 
 }
 
-input:focus{
+h2 {
 
-    border-color:#2563eb;
+    text-align: center;
 
-}
-
-.remember{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    margin-bottom:25px;
+    margin-bottom: 5px;
 
 }
 
-button{
+p {
 
-    width:100%;
+    text-align: center;
 
-    padding:15px;
+    color: #777;
 
-    border:none;
-
-    border-radius:14px;
-
-    background:#2563eb;
-
-    color:white;
-
-    font-size:16px;
-
-    font-weight:600;
-
-    cursor:pointer;
-
-    transition:.25s;
+    margin-bottom: 30px;
 
 }
 
-button:hover{
+input {
 
-    transform:translateY(-2px);
+    width: 100%;
 
-    box-shadow:0 12px 35px rgba(37,99,235,.35);
+    box-sizing: border-box;
+
+    margin-bottom: 15px;
+
+    padding: 15px;
+
+    border-radius: 14px;
+
+    border: 1px solid #ddd;
+
+    outline: none;
+
+    transition: .2s;
 
 }
 
-.error{
+input:focus {
 
-    margin-top:18px;
-
-    text-align:center;
-
-    color:red;
+    border-color: #2563eb;
 
 }
 
-@keyframes popup{
+.remember {
 
-    from{
+    display: flex;
 
-        opacity:0;
+    align-items: center;
 
-        transform:translateY(-40px) scale(.9);
+    gap: 10px;
+
+    margin-bottom: 25px;
+
+}
+
+button {
+
+    width: 100%;
+
+    padding: 15px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 16px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .25s;
+
+}
+
+button:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 12px 35px rgba(37, 99, 235, .35);
+
+}
+
+.error {
+
+    margin-top: 18px;
+
+    text-align: center;
+
+    color: red;
+
+}
+
+.switch {
+
+    margin-top: 25px;
+
+    text-align: center;
+
+    color: #666;
+
+}
+
+.switch a {
+
+    color: #2563eb;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+}
+
+@keyframes popup {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(-40px) scale(.9);
 
     }
 
-    to{
+    to {
 
-        opacity:1;
+        opacity: 1;
 
-        transform:translateY(0) scale(1);
-
-    }
-
-}
-
-@keyframes fade{
-
-    from{
-
-        opacity:0;
-
-    }
-
-    to{
-
-        opacity:1;
+        transform: translateY(0) scale(1);
 
     }
 
 }
 
+@keyframes fade {
+
+    from {
+
+        opacity: 0;
+
+    }
+
+    to {
+
+        opacity: 1;
+
+    }
+
+}
 </style>

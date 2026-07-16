@@ -81,6 +81,11 @@
                             ❤ В избранное
 
                         </button>
+                        <button @click="addToCart">
+
+                            🛒 В корзину
+
+                        </button>
 
                     </div>
 
@@ -179,6 +184,29 @@ async function load() {
         currentImage.value = image(data.images[0]);
 
 }
+async function addToCart() {
+
+    try {
+
+        await api.post("/cart/add", {
+            productId: product.value.id,
+            quantity: 1
+        });
+
+        alert("Товар добавлен в корзину");
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+        console.log(e.response?.status);
+
+        console.log(e.response?.data);
+
+    }
+
+}
 
 function image(name) {
 
@@ -231,8 +259,6 @@ onMounted(load);
 </script>
 
 <style scoped>
-
-
 .product-page {
 
     padding: 40px 0;
@@ -247,61 +273,61 @@ onMounted(load);
 
 }
 
-.product-layout{
+.product-layout {
 
-    display:grid;
+    display: grid;
 
-    grid-template-columns:540px 1fr;
+    grid-template-columns: 540px 1fr;
 
-    gap:80px;
+    gap: 80px;
 
-    align-items:start;
+    align-items: start;
 
-    margin-bottom:50px;
-
-}
-
-.gallery{
-
-    position:sticky;
-
-    top:100px;
-
-    animation:showLeft .7s ease;
+    margin-bottom: 50px;
 
 }
 
-.info{
+.gallery {
 
-    animation:showRight .7s ease;
+    position: sticky;
+
+    top: 100px;
+
+    animation: showLeft .7s ease;
 
 }
 
-.main-image{
+.info {
 
-    width:100%;
+    animation: showRight .7s ease;
 
-    aspect-ratio:1;
+}
 
-    object-fit:contain;
+.main-image {
 
-    background:white;
+    width: 100%;
 
-    border-radius:26px;
+    aspect-ratio: 1;
 
-    padding:30px;
+    object-fit: contain;
+
+    background: white;
+
+    border-radius: 26px;
+
+    padding: 30px;
 
     box-shadow:
 
-        0 15px 45px rgba(0,0,0,.08);
+        0 15px 45px rgba(0, 0, 0, .08);
 
-    transition:.35s;
+    transition: .35s;
 
 }
 
-.main-image:hover{
+.main-image:hover {
 
-    transform:scale(1.02);
+    transform: scale(1.02);
 
 }
 
@@ -339,69 +365,69 @@ onMounted(load);
 
 }
 
-.brand{
+.brand {
 
-    display:inline-block;
+    display: inline-block;
 
-    background:#eef5ff;
+    background: #eef5ff;
 
-    color:#2563eb;
+    color: #2563eb;
 
-    padding:8px 18px;
+    padding: 8px 18px;
 
-    border-radius:999px;
+    border-radius: 999px;
 
-    font-weight:700;
-
-}
-
-h1{
-
-    margin:20px 0;
-
-    font-size:48px;
-
-    line-height:1.2;
+    font-weight: 700;
 
 }
 
-.price{
+h1 {
 
-    font-size:54px;
+    margin: 20px 0;
 
-    font-weight:900;
+    font-size: 48px;
 
-    color:#111;
-
-    margin-top:30px;
+    line-height: 1.2;
 
 }
 
-.stock{
+.price {
 
-    display:inline-block;
+    font-size: 54px;
 
-    margin-top:25px;
+    font-weight: 900;
 
-    background:#e9fff1;
+    color: #111;
 
-    color:#16a34a;
-
-    padding:10px 18px;
-
-    border-radius:999px;
-
-    font-weight:700;
+    margin-top: 30px;
 
 }
 
-.buttons{
+.stock {
 
-    display:flex;
+    display: inline-block;
 
-    gap:18px;
+    margin-top: 25px;
 
-    margin-top:35px;
+    background: #e9fff1;
+
+    color: #16a34a;
+
+    padding: 10px 18px;
+
+    border-radius: 999px;
+
+    font-weight: 700;
+
+}
+
+.buttons {
+
+    display: flex;
+
+    gap: 18px;
+
+    margin-top: 35px;
 
 }
 
@@ -422,93 +448,93 @@ h1{
 
 }
 
-.buy{
+.buy {
 
-    flex:1;
+    flex: 1;
 
-    border:none;
+    border: none;
 
-    border-radius:18px;
+    border-radius: 18px;
 
-    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
 
-    color:white;
+    color: white;
 
-    font-size:18px;
+    font-size: 18px;
 
-    font-weight:700;
+    font-weight: 700;
 
-    cursor:pointer;
+    cursor: pointer;
 
-    padding:18px;
+    padding: 18px;
 
-    transition:.35s;
+    transition: .35s;
 
 }
 
-.buy:hover{
+.buy:hover {
 
-    transform:translateY(-4px);
+    transform: translateY(-4px);
 
     box-shadow:
 
-        0 15px 35px rgba(37,99,235,.35);
+        0 15px 35px rgba(37, 99, 235, .35);
 
 }
 
-.cart{
+.cart {
 
-    flex:1;
+    flex: 1;
 
-    border:2px solid #2563eb;
+    border: 2px solid #2563eb;
 
-    background:white;
+    background: white;
 
-    color:#2563eb;
+    color: #2563eb;
 
-    border-radius:18px;
+    border-radius: 18px;
 
-    cursor:pointer;
+    cursor: pointer;
 
-    font-size:18px;
+    font-size: 18px;
 
-    font-weight:700;
+    font-weight: 700;
 
-    transition:.35s;
-
-}
-
-.cart:hover{
-
-    background:#2563eb;
-
-    color:white;
+    transition: .35s;
 
 }
 
-.card{
+.cart:hover {
 
-    background:white;
+    background: #2563eb;
 
-    border-radius:24px;
+    color: white;
 
-    padding:35px;
+}
 
-    margin-top:40px;
+.card {
+
+    background: white;
+
+    border-radius: 24px;
+
+    padding: 35px;
+
+    margin-top: 40px;
 
     box-shadow:
 
-        0 10px 35px rgba(0,0,0,.05);
+        0 10px 35px rgba(0, 0, 0, .05);
 
 }
 
-.credit{
+.credit {
 
-    margin-top:10px;
+    margin-top: 10px;
 
-    color:#777;
+    color: #777;
 
-    font-size:18px;
+    font-size: 18px;
 
 }
 
@@ -520,19 +546,19 @@ table {
 
 }
 
-.card{
+.card {
 
-    background:white;
+    background: white;
 
-    border-radius:24px;
+    border-radius: 24px;
 
-    padding:35px;
+    padding: 35px;
 
-    margin-top:40px;
+    margin-top: 40px;
 
     box-shadow:
 
-        0 10px 35px rgba(0,0,0,.05);
+        0 10px 35px rgba(0, 0, 0, .05);
 
 }
 
@@ -543,41 +569,42 @@ td:first-child {
     width: 320px;
 
 }
-@keyframes showLeft{
 
-    from{
+@keyframes showLeft {
 
-        opacity:0;
+    from {
 
-        transform:translateX(-60px);
+        opacity: 0;
+
+        transform: translateX(-60px);
 
     }
 
-    to{
+    to {
 
-        opacity:1;
+        opacity: 1;
 
-        transform:none;
+        transform: none;
 
     }
 
 }
 
-@keyframes showRight{
+@keyframes showRight {
 
-    from{
+    from {
 
-        opacity:0;
+        opacity: 0;
 
-        transform:translateX(60px);
+        transform: translateX(60px);
 
     }
 
-    to{
+    to {
 
-        opacity:1;
+        opacity: 1;
 
-        transform:none;
+        transform: none;
 
     }
 

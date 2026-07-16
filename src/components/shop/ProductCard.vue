@@ -39,7 +39,7 @@
 
             </div>
 
-            <button @mouseenter="enterButton" @mouseleave="leaveButton">
+            <button @mouseenter="enterButton" @mouseleave="leaveButton" @click="addToCart">
                 🛒 В корзину
             </button>
 
@@ -51,7 +51,7 @@
 <script setup>
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-
+import api from "@/api/api";
 
 const router = useRouter();
 const props = defineProps({
@@ -64,40 +64,68 @@ const glareStyle = ref({});
 const freeze = ref(false);
 
 const image = computed(() => {
-    
-    if (!props.product.images || props.product.images.length === 0)
-    return null;
 
-return `http://localhost:5263/images/products/${props.product.id}/${props.product.images[0]}`;
+    if (!props.product.images || props.product.images.length === 0)
+        return null;
+
+    return `http://localhost:5263/images/products/${props.product.id}/${props.product.images[0]}`;
 
 });
 
+async function addToCart() {
+
+    try {
+
+        await api.post("/cart/add", {
+
+            productId: props.product.id,
+
+            quantity: 1
+
+        });
+
+        alert("Товар добавлен в корзину");
+
+    }
+
+    catch {
+
+        console.error(e);
+
+        console.log(e.response?.status);
+
+        console.log(e.response?.data);
+        alert("Необходимо войти");
+
+    }
+
+}
 function openProduct() {
     router.push(`/product/${props.product.id}`);
 }
-function move(){
+function move() {
 
-    if(freeze.value)
+    if (freeze.value)
         return;
 
-    card.value.style.transform=
+    card.value.style.transform =
         "perspective(900px) translateZ(40px) translateY(-8px)";
 
 }
 
-function leave(){
+function leave() {
 
-    freeze.value=false;
+    freeze.value = false;
 
-    card.value.style.transform=
+    card.value.style.transform =
         "perspective(900px) translateZ(0) translateY(0)";
 
 }
-function enterButton(){
+function enterButton() {
 
-    freeze.value=true;
+    freeze.value = true;
 
-    card.value.style.transform=
+    card.value.style.transform =
         "perspective(900px) translateZ(55px) translateY(-12px)";
 
 }
@@ -108,32 +136,32 @@ function leaveButton() {
 </script>
 
 <style scoped>
-.card{
+.card {
 
-    position:relative;
+    position: relative;
 
-    overflow:hidden;
+    overflow: hidden;
 
-    background:white;
+    background: white;
 
-    border-radius:22px;
+    border-radius: 22px;
 
     transition:
-        transform .35s cubic-bezier(.2,.9,.2,1),
+        transform .35s cubic-bezier(.2, .9, .2, 1),
         box-shadow .35s;
 
-    transform-style:preserve-3d;
+    transform-style: preserve-3d;
 
-    box-shadow:0 12px 35px rgba(0,0,0,.08);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, .08);
 
-    cursor:pointer;
+    cursor: pointer;
 
 }
 
-.card:hover{
+.card:hover {
 
     box-shadow:
-        0 35px 80px rgba(0,0,0,.18);
+        0 35px 80px rgba(0, 0, 0, .18);
 
 }
 
@@ -239,43 +267,44 @@ h3 {
 
 }
 
-button{
+button {
 
-    width:100%;
+    width: 100%;
 
-    padding:14px;
+    padding: 14px;
 
-    border:none;
+    border: none;
 
-    border-radius:14px;
+    border-radius: 14px;
 
-    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
 
-    color:white;
+    color: white;
 
-    font-size:16px;
+    font-size: 16px;
 
-    font-weight:700;
+    font-weight: 700;
 
-    cursor:pointer;
+    cursor: pointer;
 
-    transition:.25s;
+    transition: .25s;
 
-    position:relative;
+    position: relative;
 
-    overflow:hidden;
+    overflow: hidden;
 
 }
-button:hover{
 
-    transform:translateY(-2px) scale(1.03);
+button:hover {
+
+    transform: translateY(-2px) scale(1.03);
 
     box-shadow:
-        0 0 15px rgba(37,99,235,.45),
-        0 0 35px rgba(37,99,235,.35),
-        0 0 60px rgba(37,99,235,.25);
+        0 0 15px rgba(37, 99, 235, .45),
+        0 0 35px rgba(37, 99, 235, .35),
+        0 0 60px rgba(37, 99, 235, .25);
 
-    animation:glow 1.4s infinite alternate;
+    animation: glow 1.4s infinite alternate;
 
 }
 
@@ -285,24 +314,24 @@ button:hover {
     background: #1e4fd8;
 
 }
-@keyframes glow{
 
-    from{
+@keyframes glow {
+
+    from {
 
         box-shadow:
-            0 0 15px rgba(37,99,235,.35),
-            0 0 35px rgba(37,99,235,.25);
+            0 0 15px rgba(37, 99, 235, .35),
+            0 0 35px rgba(37, 99, 235, .25);
 
     }
 
-    to{
+    to {
 
         box-shadow:
-            0 0 25px rgba(37,99,235,.75),
-            0 0 55px rgba(37,99,235,.45);
+            0 0 25px rgba(37, 99, 235, .75),
+            0 0 55px rgba(37, 99, 235, .45);
 
     }
 
 }
-
 </style>

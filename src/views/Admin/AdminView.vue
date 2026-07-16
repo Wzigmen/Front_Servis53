@@ -208,9 +208,9 @@
 
                                 </button>
 
-                                <button class="delete">
+                                <button class="delete" @click="deleteProduct(product.id)">
 
-                                    🗑️
+                                    🗑
 
                                 </button>
 
@@ -341,11 +341,86 @@
 
                         <input v-model="form.name" placeholder="Название">
 
+                        <textarea v-model="form.description" placeholder="Описание"></textarea>
+
                         <input v-model="form.price" type="number" placeholder="Цена">
 
                         <input v-model="form.quantity" type="number" placeholder="Количество">
 
-                        <textarea v-model="form.description" placeholder="Описание" />
+                        <input v-model="form.warrantyMonths" type="number" placeholder="Гарантия (месяцев)">
+
+                        <!-- Категория -->
+
+                        <select v-model="form.categoryId">
+
+                            <option disabled value="">
+
+                                Выберите категорию
+
+                            </option>
+
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+
+                                {{ category.name }}
+
+                            </option>
+
+                        </select>
+
+                        <!-- Бренд -->
+
+                        <select v-model="form.brandId">
+
+                            <option disabled value="">
+
+                                Выберите бренд
+
+                            </option>
+
+                            <option v-for="brand in brands" :key="brand.id" :value="brand.id">
+
+                                {{ brand.name }}
+
+                            </option>
+
+                        </select>
+
+                        <!-- Характеристики телефона -->
+
+                        <template v-if="selectedCategory?.name === 'Смартфоны'">
+
+                            <h3>
+
+                                📱 Характеристики смартфона
+
+                            </h3>
+
+                            <input v-model="form.phone.screenSize" placeholder="Размер экрана">
+
+                            <input v-model="form.phone.resolution" placeholder="Разрешение">
+
+                            <input v-model="form.phone.processor" placeholder="Процессор">
+
+                            <input v-model="form.phone.ram" placeholder="Оперативная память">
+
+                            <input v-model="form.phone.storage" placeholder="Память">
+
+                            <input v-model="form.phone.rearCamera" placeholder="Основная камера">
+
+                            <input v-model="form.phone.frontCamera" placeholder="Фронтальная камера">
+
+                            <input v-model="form.phone.battery" placeholder="Аккумулятор">
+
+                            <input v-model="form.phone.operatingSystem" placeholder="Операционная система">
+
+                            <input v-model="form.phone.simType" placeholder="SIM">
+
+                            <input v-model="form.phone.network" placeholder="Сеть">
+
+                        </template>
+
+                        <!-- Фотографии -->
+
                         <div class="upload">
 
                             <label class="upload-btn">
@@ -382,17 +457,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "@/api/api";
 
+
+const categories = ref([]);
+const brands = ref([]);
 const currentPage = ref("dashboard");
-
 const products = ref([]);
-
 const showAddProduct = ref(false);
-
 const images = ref([]);
-
 const form = ref({
 
     name: "",
@@ -403,11 +477,65 @@ const form = ref({
 
     quantity: 1,
 
-    categoryId: 1,
+    warrantyMonths: 12,
 
-    brandId: 1
+    categoryId: "",
+
+    brandId: "",
+
+    phone: {
+
+        screenSize: "",
+
+        resolution: "",
+
+        processor: "",
+
+        ram: "",
+
+        storage: "",
+
+        rearCamera: "",
+
+        frontCamera: "",
+
+        battery: "",
+
+        operatingSystem: "",
+
+        simType: "",
+
+        network: ""
+
+    }
 
 });
+
+const selectedCategory = computed(() => {
+
+    return categories.value.find(
+
+        x => x.id == form.value.categoryId
+
+    );
+
+});
+
+async function loadCategories() {
+
+    const { data } = await api.get("/categories");
+
+    categories.value = data;
+
+}
+
+async function loadBrands() {
+
+    const { data } = await api.get("/brands");
+
+    brands.value = data;
+
+}
 
 function preview(file) {
 
@@ -427,6 +555,18 @@ async function loadProducts() {
 
         const { data } = await api.get("/products");
 
+        // if (
+        //     selectedCategory.value?.name === "Смартфоны"
+        // ) {
+        //     await api.post(
+
+        //         `/products/${data.id}/phone`,
+
+        //         form.value.phone
+
+        //     );
+        // }
+
         products.value = data.products;
 
     }
@@ -439,16 +579,27 @@ async function loadProducts() {
 }
 
 async function saveProduct() {
-
+    console.log("PRODUCT");
     try {
 
-        // Создаем товар
         const { data } = await api.post(
             "/products",
             form.value
         );
 
-        // Загружаем изображения
+        // сохраняем характеристики
+
+        if (selectedCategory.value?.name === "Смартфоны") {
+
+            await api.post(
+                `/products/${data.id}/phone`,
+                form.value.phone
+            );
+
+        }
+
+        // загружаем изображения
+
         if (images.value.length > 0) {
 
             const fd = new FormData();
@@ -465,32 +616,7 @@ async function saveProduct() {
             );
 
         }
-
-        // Закрываем окно
-        showAddProduct.value = false;
-
-        // Очищаем форму
-        form.value = {
-
-            name: "",
-
-            description: "",
-
-            price: 0,
-
-            quantity: 1,
-
-            categoryId: "",
-
-            brandId: ""
-
-        };
-
-        images.value = [];
-
-        // Обновляем список товаров
-        await loadProducts();
-
+        console.log("SAVE PRODUCT");
     }
     catch (e) {
 
@@ -499,10 +625,23 @@ async function saveProduct() {
     }
 
 }
+async function deleteProduct(id) {
 
+    if (!confirm("Удалить товар?"))
+        return;
+
+    await api.delete(`/products/${id}`);
+
+    await loadProducts();
+
+}
 onMounted(() => {
 
     loadProducts();
+
+    loadCategories();
+
+    loadBrands();
 
 });
 </script>

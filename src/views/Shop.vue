@@ -44,7 +44,8 @@
                         </button>
 
                         <button v-for="category in categories" :key="category.id" class="chip"
-                            :class="{ active: filters.categoryId === category.id }" @click="filters.categoryId = category.id">
+                            :class="{ active: filters.categoryId === category.id }"
+                            @click="filters.categoryId = category.id">
                             {{ category.name }}
                         </button>
 
@@ -58,7 +59,8 @@
 
                     <div class="chips">
 
-                        <button class="chip" :class="{ active: filters.brandId === null }" @click="filters.brandId = null">
+                        <button class="chip" :class="{ active: filters.brandId === null }"
+                            @click="filters.brandId = null">
                             Все
                         </button>
 
@@ -97,19 +99,19 @@
 
                 <div class="products-top">
                     <select v-model="filters.sort">
-                        
+
                         <option value="">
                             По умолчанию
                         </option>
-                        
+
                         <option value="priceAsc">
                             Сначала дешевле
                         </option>
-                        
+
                         <option value="priceDesc">
                             Сначала дороже
                         </option>
-                        
+
                     </select>
                 </div>
 
@@ -123,7 +125,22 @@
 
                 </div>
 
+                <div class="pagination">
 
+                    <button :disabled="filters.page === 1" @click="filters.page--">
+                        ←
+                    </button>
+
+                    <button v-for="page in totalPages" :key="page" :class="{ active: page === filters.page }"
+                        @click="filters.page = page">
+                        {{ page }}
+                    </button>
+
+                    <button :disabled="filters.page === totalPages" @click="filters.page++">
+                        →
+                    </button>
+
+                </div>
             </main>
 
 
@@ -137,7 +154,7 @@
 
 <script setup>
 import ProductCard from "@/components/shop/ProductCard.vue";
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import api from "@/api/api";
 
 
@@ -145,6 +162,13 @@ const products = ref([]);
 const categories = ref([]);
 const brands = ref([]);
 const total = ref(0);
+const totalPages = computed(() => {
+
+    return Math.ceil(
+        total.value / filters.value.pageSize
+    );
+
+});
 const loading = ref(false);
 
 const filters = ref({
@@ -229,6 +253,62 @@ onMounted(async () => {
 
 
 <style scoped>
+.pagination{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:12px;
+
+    margin-top:50px;
+
+}
+
+.pagination button{
+
+    width:46px;
+
+    height:46px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:white;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    transition:.25s;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.05);
+
+}
+
+.pagination button:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.pagination button.active{
+
+    background:#2563eb;
+
+    color:white;
+
+}
+
+.pagination button:disabled{
+
+    opacity:.4;
+
+    cursor:default;
+
+}
+
 .shop-page {
 
     padding: 40px;
@@ -390,29 +470,29 @@ onMounted(async () => {
 
 }
 
-.products-top select{
+.products-top select {
 
-    padding:12px 18px;
+    padding: 12px 18px;
 
-    border:none;
+    border: none;
 
-    outline:none;
+    outline: none;
 
-    border-radius:14px;
+    border-radius: 14px;
 
-    background:white;
+    background: white;
 
-    box-shadow:0 5px 20px rgba(0,0,0,.06);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, .06);
 
-    cursor:pointer;
+    cursor: pointer;
 
-    transition:.3s;
+    transition: .3s;
 
 }
 
-.products-top select:hover{
+.products-top select:hover {
 
-    transform:translateY(-2px);
+    transform: translateY(-2px);
 
 }
 

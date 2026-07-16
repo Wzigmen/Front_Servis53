@@ -24,16 +24,20 @@
             <div class="actions">
 
                 <button class="icon-btn">
-                    <Search :size="20" />
-                </button>
-
-                <button class="icon-btn">
                     <Heart :size="20" />
                 </button>
 
-                <button class="icon-btn">
+                <RouterLink to="/cart" class="icon-btn cart-btn">
+
                     <ShoppingCart :size="20" />
-                </button>
+
+                    <span v-if="cartCount > 0" class="cart-count">
+
+                        {{ cartCount }}
+
+                    </span>
+
+                </RouterLink>
 
                 <button v-if="!auth.isAuthenticated" class="login-btn" @click="showLogin = true">
 
@@ -53,12 +57,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { Search, Heart, ShoppingCart, User } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth";
 import LoginModal from "@/components/auth/LoginModal.vue";
+import api from "@/api/api";
 
 const auth = useAuthStore();
+const cart = ref({
+    items: []
+});
 const showLogin = ref(false);
 const isScrolled = ref(false);
 
@@ -66,8 +74,44 @@ const handleScroll = () => {
     isScrolled.value = window.scrollY > 40;
 };
 
+const cartCount = computed(() => {
+
+    return cart.value.items.reduce(
+
+        (sum, item) => sum + item.quantity,
+
+        0
+
+    );
+
+});
+
+async function loadCart() {
+
+    if (!auth.isAuthenticated)
+        return;
+
+    try {
+
+        const { data } = await api.get("/cart");
+
+        cart.value = data;
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+    }
+
+}
+
 onMounted(() => {
+
     window.addEventListener("scroll", handleScroll);
+
+    loadCart();
+
 });
 
 onUnmounted(() => {
@@ -76,25 +120,60 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.admin-btn{
+.cart-btn{
 
-    padding:12px 22px;
-
-    border-radius:14px;
-
-    background:#111827;
-
-    color:white;
-
-    font-weight:700;
-
-    transition:.3s;
+    position:relative;
 
 }
 
-.admin-btn:hover{
+.cart-count{
 
-    transform:translateY(-2px);
+    position:absolute;
+
+    top:-6px;
+
+    right:-6px;
+
+    width:20px;
+
+    height:20px;
+
+    border-radius:50%;
+
+    background:#2563eb;
+
+    color:white;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:12px;
+
+    font-weight:700;
+
+}
+.admin-btn {
+
+    padding: 12px 22px;
+
+    border-radius: 14px;
+
+    background: #111827;
+
+    color: white;
+
+    font-weight: 700;
+
+    transition: .3s;
+
+}
+
+.admin-btn:hover {
+
+    transform: translateY(-2px);
 
 }
 

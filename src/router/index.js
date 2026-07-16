@@ -7,6 +7,7 @@ import Contacts from "@/views/Contacts.vue";
 import Profile from "@/views/Profile.vue";
 import Login from "@/views/Login.vue";
 import AdminView from "@/views/Admin/AdminView.vue";
+import CartView from "@/views/CartView.vue";
 
 import { useAuthStore } from "@/stores/auth";
 
@@ -59,6 +60,14 @@ const routes = [
     name: "product",
     component: () => import("@/views/ProductView.vue"),
   },
+  {
+    path: "/cart",
+    name: "Cart",
+    component: CartView,
+    meta: {
+        requiresAuth: true
+    }
+},
 ];
 
 // Потом создаем router
