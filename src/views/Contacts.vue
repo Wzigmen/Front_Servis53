@@ -60,39 +60,22 @@
           <form @submit.prevent="submitForm" class="contact-form">
             <div class="form-group">
               <label for="name">Ваше имя *</label>
-              <input
-                id="name"
-                v-model="form.name"
-                type="text"
-                placeholder="Иван Иванов"
-                :class="{ error: errors.name }"
-                required
-              />
+              <input id="name" v-model="form.name" type="text" placeholder="Иван Иванов" :class="{ error: errors.name }"
+                required />
               <span class="error-message" v-if="errors.name">{{ errors.name }}</span>
             </div>
 
             <div class="form-group">
               <label for="phone">Телефон *</label>
-              <input
-                id="phone"
-                v-model="form.phone"
-                type="tel"
-                placeholder="+7 (999) 123-45-67"
-                :class="{ error: errors.phone }"
-                required
-              />
+              <input id="phone" v-model="form.phone" type="tel" placeholder="+7 (999) 123-45-67"
+                :class="{ error: errors.phone }" required />
               <span class="error-message" v-if="errors.phone">{{ errors.phone }}</span>
             </div>
 
             <div class="form-group">
               <label for="email">Email</label>
-              <input
-                id="email"
-                v-model="form.email"
-                type="email"
-                placeholder="example@mail.ru"
-                :class="{ error: errors.email }"
-              />
+              <input id="email" v-model="form.email" type="email" placeholder="example@mail.ru"
+                :class="{ error: errors.email }" />
               <span class="error-message" v-if="errors.email">{{ errors.email }}</span>
             </div>
 
@@ -110,12 +93,7 @@
 
             <div class="form-group">
               <label for="message">Сообщение</label>
-              <textarea
-                id="message"
-                v-model="form.message"
-                rows="4"
-                placeholder="Опишите вашу проблему..."
-              ></textarea>
+              <textarea id="message" v-model="form.message" rows="4" placeholder="Опишите вашу проблему..."></textarea>
             </div>
 
             <button type="submit" class="submit-btn" :disabled="isSubmitting">
@@ -139,6 +117,9 @@
 </template>
 
 <script>
+import axios from "axios";
+import api from "@/api/api";
+
 export default {
   name: 'Contacts',
   data() {
@@ -183,25 +164,47 @@ export default {
       return isValid
     },
 
-    submitForm() {
+    async submitForm() {
+
       if (!this.validateForm()) {
-        return
+        return;
       }
 
-      this.isSubmitting = true
+      this.isSubmitting = true;
 
-      // Имитация отправки
-      setTimeout(() => {
-        alert('Спасибо! Ваша заявка успешно отправлена.\nМы свяжемся с вами в ближайшее время!')
+      try {
+
+        await api.post(
+    "http://localhost:5001/send",
+    this.form
+);
+
+        alert(
+          "Спасибо! Ваша заявка успешно отправлена.\nМы свяжемся с вами в ближайшее время!"
+        );
+
         this.form = {
-          name: '',
-          phone: '',
-          email: '',
-          service: '',
-          message: ''
-        }
-        this.isSubmitting = false
-      }, 1500)
+          name: "",
+          phone: "",
+          email: "",
+          service: "",
+          message: ""
+        };
+
+      }
+      catch (e) {
+
+        console.error(e);
+
+        alert("Не удалось отправить заявку.");
+
+      }
+      finally {
+
+        this.isSubmitting = false;
+
+      }
+
     }
   }
 }
