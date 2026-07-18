@@ -76,6 +76,8 @@
 </template>
 
 <script>
+import { useRouter } from "vue-router";
+
 export default {
   name: 'Services',
   data() {
@@ -106,10 +108,23 @@ export default {
   },
   methods: {
     orderService(serviceName) {
-      alert(`Вы заказали услугу: "${serviceName}". Мы свяжемся с вами в ближайшее время!`)
+
+      this.$router.push({
+
+        path: "/contacts",
+
+        query: {
+
+          service: serviceName
+
+        }
+
+      });
+
     }
   }
 }
+
 </script>
 
 <style scoped>

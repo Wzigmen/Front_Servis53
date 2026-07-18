@@ -80,15 +80,75 @@
             </div>
 
             <div class="form-group">
+
               <label for="service">Тип услуги</label>
-              <select id="service" v-model="form.service">
-                <option value="">Выберите услугу</option>
-                <option value="repair-pc">Ремонт компьютера</option>
-                <option value="repair-phone">Ремонт телефона</option>
-                <option value="buy">Покупка техники</option>
-                <option value="consultation">Консультация</option>
-                <option value="other">Другое</option>
+
+              <template v-if="form.service">
+
+                <div class="selected-service">
+
+                  🔧 {{ form.service }}
+
+                  <button type="button" class="change-service" @click="form.service = ''">
+                    Изменить
+                  </button>
+
+                </div>
+
+              </template>
+
+              <select v-else id="service" v-model="form.service">
+
+                <option disabled value="">
+                  Выберите услугу
+                </option>
+
+                <optgroup label="Ремонт компьютеров">
+
+                  <option>Диагностика</option>
+
+                  <option>Чистка от пыли</option>
+
+                  <option>Установка Windows</option>
+
+                  <option>Замена комплектующих</option>
+
+                  <option>Ремонт материнской платы</option>
+
+                  <option>Удаление вирусов</option>
+
+                </optgroup>
+
+                <optgroup label="Ремонт телефонов">
+
+                  <option>Замена экрана</option>
+
+                  <option>Замена аккумулятора</option>
+
+                  <option>Ремонт разъема зарядки</option>
+
+                  <option>Восстановление после воды</option>
+
+                  <option>Замена корпуса</option>
+
+                  <option>Прошивка</option>
+
+                </optgroup>
+
+                <optgroup label="Дополнительно">
+
+                  <option>Настройка Wi-Fi</option>
+
+                  <option>Сборка ПК на заказ</option>
+
+                  <option>Настройка ПО</option>
+
+                  <option>Консультация</option>
+
+                </optgroup>
+
               </select>
+
             </div>
 
             <div class="form-group">
@@ -118,6 +178,7 @@
 
 <script>
 import axios from "axios";
+import { useRoute } from "vue-router";
 import api from "@/api/api";
 
 export default {
@@ -134,6 +195,16 @@ export default {
       errors: {},
       isSubmitting: false
     }
+
+  },
+  mounted() {
+
+    if (this.$route.query.service) {
+
+      this.form.service = this.$route.query.service;
+
+    }
+
   },
   methods: {
     validateForm() {
@@ -175,9 +246,9 @@ export default {
       try {
 
         await api.post(
-    "http://localhost:5001/send",
-    this.form
-);
+          "http://localhost:5001/send",
+          this.form
+        );
 
         alert(
           "Спасибо! Ваша заявка успешно отправлена.\nМы свяжемся с вами в ближайшее время!"
@@ -456,6 +527,74 @@ export default {
 .map-note {
   font-size: 14px;
   color: #999;
+}
+
+.selected-service{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:8px 18px;
+
+    border:1px solid #dbe3ee;
+
+    border-radius:12px;
+
+    background:#f8fafc;
+
+    transition:.25s;
+
+}
+
+.selected-service:hover{
+
+    border-color:#2563eb;
+
+}
+
+.selected-service span{
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#1e293b;
+
+}
+
+.change-service{
+
+    border:1px solid #dbe3ee;
+
+    background:white;
+
+    color:#2563eb;
+
+    padding:8px 16px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.change-service:hover{
+
+    border-color:#2563eb;
+
+    background:#2563eb;
+
+    color:white;
+
 }
 
 @media (max-width: 768px) {

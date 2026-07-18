@@ -83,7 +83,7 @@ async function addToCart() {
             quantity: 1
 
         });
-
+        window.dispatchEvent(new Event("cart-updated"));
         alert("Товар добавлен в корзину");
 
     }

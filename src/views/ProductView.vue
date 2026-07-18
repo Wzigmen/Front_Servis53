@@ -70,7 +70,7 @@
 
                     <div class="buttons">
 
-                        <button class="buy">
+                        <button to="/cart" class="buy" @click="addToCart">
 
                             🛒 Купить сейчас
 
@@ -79,11 +79,6 @@
                         <button class="cart">
 
                             ❤ В избранное
-
-                        </button>
-                        <button @click="addToCart">
-
-                            🛒 В корзину
 
                         </button>
 
@@ -192,7 +187,7 @@ async function addToCart() {
             productId: product.value.id,
             quantity: 1
         });
-
+        window.dispatchEvent(new Event("cart-updated"));
         alert("Товар добавлен в корзину");
 
     }

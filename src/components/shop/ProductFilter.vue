@@ -1,120 +1,100 @@
 <template>
 
-<div class="filter">
+    <div class="filter">
 
 
-<h2>
-Фильтры
-</h2>
+        <h2>
+            Фильтры
+        </h2>
 
 
-<div class="filter-block">
+        <div class="filter-block">
 
 
-<h3>
-Поиск
-</h3>
+            <h3>
+                Поиск
+            </h3>
 
 
-<input
-v-model="filters.search"
-placeholder="Название товара"
-/>
+            <input v-model="filters.search" placeholder="Название товара" />
 
 
-</div>
+        </div>
 
 
 
 
-<div class="filter-block">
+        <div class="filter-block">
 
 
-<h3>
-Категория
-</h3>
+            <h3>
+                Категория
+            </h3>
 
 
-<select v-model="filters.category">
+            <select v-model="filters.category">
 
 
-<option value="">
-Все категории
-</option>
+                <option value="">
+                    Все категории
+                </option>
 
 
-<option
-v-for="category in categories"
-:key="category.id"
-:value="category.id"
->
+                <option v-for="category in categories" :key="category.id" :value="category.id">
 
-{{category.name}}
+                    {{ category.name }}
 
-</option>
+                </option>
 
 
-</select>
+            </select>
 
 
-</div>
+        </div>
 
 
 
 
-<div class="filter-block">
+        <div class="filter-block">
 
 
-<h3>
-Цена
-</h3>
+            <h3>
+                Цена
+            </h3>
 
 
-<div class="price">
+            <div class="price">
 
 
-<input
-type="number"
-v-model="filters.minPrice"
-placeholder="От"
-/>
+                <input type="number" v-model="filters.minPrice" placeholder="От" />
 
 
-<input
-type="number"
-v-model="filters.maxPrice"
-placeholder="До"
-/>
+                <input type="number" v-model="filters.maxPrice" placeholder="До" />
 
 
-</div>
+            </div>
 
 
-</div>
+        </div>
 
 
 
 
-<button
-@click="apply"
->
+        <button @click="apply">
 
-Применить
+            Применить
 
-</button>
+        </button>
 
 
-<button
-class="reset"
-@click="reset"
->
+        <button class="reset" @click="reset">
 
-Сбросить
+            Сбросить
 
-</button>
+        </button>
 
 
-</div>
+    </div>
 
 
 </template>
@@ -124,67 +104,67 @@ class="reset"
 <script setup>
 
 
-import {reactive} from "vue";
+import { reactive } from "vue";
 
 
-const emit=defineEmits([
-"filter"
+const emit = defineEmits([
+    "filter"
 ]);
 
 
 
-const props=defineProps({
+const props = defineProps({
 
-categories:{
-type:Array,
-default:()=>[]
-}
-
-});
-
-
-
-const filters=reactive({
-
-search:"",
-
-category:"",
-
-minPrice:"",
-
-maxPrice:""
+    categories: {
+        type: Array,
+        default: () => []
+    }
 
 });
 
 
 
-function apply(){
+const filters = reactive({
 
-emit(
-"filter",
-{...filters}
-)
+    search: "",
+
+    category: "",
+
+    minPrice: "",
+
+    maxPrice: ""
+
+});
+
+
+
+function apply() {
+
+    emit(
+        "filter",
+        { ...filters }
+    )
 
 }
 
 
 
-function reset(){
+function reset() {
 
 
-filters.search="";
+    filters.search = "";
 
-filters.category="";
+    filters.category = "";
 
-filters.minPrice="";
+    filters.minPrice = "";
 
-filters.maxPrice="";
+    filters.maxPrice = "";
 
 
-emit(
-"filter",
-{...filters}
-)
+    emit(
+        "filter",
+        { ...filters }
+    )
 
 
 }
@@ -195,105 +175,101 @@ emit(
 
 
 <style scoped>
+.filter {
 
+    background: white;
 
-.filter{
+    border-radius: 24px;
 
-background:white;
+    padding: 25px;
 
-border-radius:24px;
-
-padding:25px;
-
-box-shadow:
-0 10px 30px rgba(0,0,0,.08);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, .08);
 
 }
 
 
 
-h2{
+h2 {
 
-font-size:28px;
+    font-size: 28px;
 
-margin-bottom:25px;
-
-}
-
-
-
-.filter-block{
-
-margin-bottom:25px;
+    margin-bottom: 25px;
 
 }
 
 
 
-h3{
+.filter-block {
 
-font-size:16px;
+    margin-bottom: 25px;
 
-margin-bottom:10px;
+}
+
+
+
+h3 {
+
+    font-size: 16px;
+
+    margin-bottom: 10px;
 
 }
 
 
 
 input,
-select{
+select {
 
-width:100%;
+    width: 100%;
 
-padding:12px;
+    padding: 12px;
 
-border-radius:12px;
+    border-radius: 12px;
 
-border:1px solid #ddd;
-
-}
-
-
-
-.price{
-
-display:flex;
-
-gap:10px;
+    border: 1px solid #ddd;
 
 }
 
 
 
-button{
+.price {
 
-width:100%;
+    display: flex;
 
-padding:14px;
-
-border:none;
-
-border-radius:14px;
-
-background:#2563eb;
-
-color:white;
-
-cursor:pointer;
-
-margin-top:10px;
+    gap: 10px;
 
 }
 
 
 
-.reset{
+button {
 
-background:#e2e8f0;
+    width: 100%;
 
-color:#334155;
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 14px;
+
+    background: #2563eb;
+
+    color: white;
+
+    cursor: pointer;
+
+    margin-top: 10px;
 
 }
 
 
+
+.reset {
+
+    background: #e2e8f0;
+
+    color: #334155;
+
+}
 </style>

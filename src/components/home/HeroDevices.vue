@@ -1,35 +1,26 @@
 <template>
 
-<div class="hero-image">
+    <div class="hero-image">
 
 
-<div class="circle circle-one"></div>
+        <div class="circle circle-one"></div>
 
-<div class="circle circle-two"></div>
-
-
-
-<img
-src="@/assets/images/hero/laptop.png"
-class="device laptop"
-/>
+        <div class="circle circle-two"></div>
 
 
 
-<img
-src="@/assets/images/hero/phone.png"
-class="device phone"
-/>
+        <img src="@/assets/images/hero/laptop.png" class="device laptop" />
 
 
 
-<img
-src="@/assets/images/hero/headphones.png"
-class="device headphones"
-/>
+        <img src="@/assets/images/hero/phone.png" class="device phone" />
 
 
-</div>
+
+        <img src="@/assets/images/hero/headphones.png" class="device headphones" />
+
+
+    </div>
 
 
 </template>
@@ -37,181 +28,180 @@ class="device headphones"
 
 
 <style scoped>
+.hero-image {
 
+    position: relative;
 
-.hero-image{
-
-position:relative;
-
-height:600px;
+    height: 600px;
 
 }
 
 
 
-.device{
+.device {
 
-position:absolute;
+    position: absolute;
 
-z-index:2;
+    z-index: 2;
 
-filter:drop-shadow(0 25px 35px rgba(0,0,0,.15));
-
-}
-
-
-
-.laptop{
-
-width:380px;
-
-top:120px;
-
-left:50%;
-
-transform:translateX(-50%);
-
-animation:floatLaptop 6s infinite ease-in-out;
+    filter: drop-shadow(0 25px 35px rgba(0, 0, 0, .15));
 
 }
 
 
 
-.phone{
+.laptop {
 
-width:130px;
+    width: 380px;
 
-bottom:120px;
+    top: 120px;
 
-left:80px;
+    left: 50%;
 
-animation:floatPhone 4.5s infinite ease-in-out;
+    transform: translateX(-50%);
 
-}
-
-
-
-.headphones{
-
-width:150px;
-
-right:50px;
-
-top:100px;
-
-animation:floatHeadphones 5.5s infinite ease-in-out;
+    animation: floatLaptop 6s infinite ease-in-out;
 
 }
 
 
 
+.phone {
 
+    width: 130px;
 
-.circle{
+    bottom: 120px;
 
-position:absolute;
+    left: 80px;
 
-border-radius:50%;
-
-filter:blur(60px);
-
-}
-
-
-
-.circle-one{
-
-width:300px;
-
-height:300px;
-
-background:#bfdbfe;
-
-right:100px;
-
-top:80px;
+    animation: floatPhone 4.5s infinite ease-in-out;
 
 }
 
 
 
-.circle-two{
+.headphones {
 
-width:250px;
+    width: 150px;
 
-height:250px;
+    right: 50px;
 
-background:#dbeafe;
+    top: 100px;
 
-left:80px;
-
-bottom:80px;
+    animation: floatHeadphones 5.5s infinite ease-in-out;
 
 }
 
 
 
 
-@keyframes floatLaptop{
 
+.circle {
 
-0%,100%{
+    position: absolute;
 
-transform:translateX(-50%) translateY(0);
+    border-radius: 50%;
 
-}
-
-
-50%{
-
-transform:translateX(-50%) translateY(-25px);
-
-}
-
+    filter: blur(60px);
 
 }
 
 
 
-@keyframes floatPhone{
+.circle-one {
 
+    width: 300px;
 
-0%,100%{
+    height: 300px;
 
-transform:translateY(0);
+    background: #bfdbfe;
 
-}
+    right: 100px;
 
-
-50%{
-
-transform:translateY(-20px);
-
-}
-
+    top: 80px;
 
 }
 
 
 
-@keyframes floatHeadphones{
+.circle-two {
 
+    width: 250px;
 
-0%,100%{
+    height: 250px;
 
-transform:translateY(0);
+    background: #dbeafe;
 
-}
+    left: 80px;
 
-
-50%{
-
-transform:translateY(-18px);
+    bottom: 80px;
 
 }
 
 
+
+
+@keyframes floatLaptop {
+
+
+    0%,
+    100% {
+
+        transform: translateX(-50%) translateY(0);
+
+    }
+
+
+    50% {
+
+        transform: translateX(-50%) translateY(-25px);
+
+    }
+
+
 }
 
 
+
+@keyframes floatPhone {
+
+
+    0%,
+    100% {
+
+        transform: translateY(0);
+
+    }
+
+
+    50% {
+
+        transform: translateY(-20px);
+
+    }
+
+
+}
+
+
+
+@keyframes floatHeadphones {
+
+
+    0%,
+    100% {
+
+        transform: translateY(0);
+
+    }
+
+
+    50% {
+
+        transform: translateY(-18px);
+
+    }
+
+
+}
 </style>

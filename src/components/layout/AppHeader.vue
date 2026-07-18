@@ -105,18 +105,22 @@ async function loadCart() {
     }
 
 }
+function cartUpdated() {
 
+    loadCart();
+
+}
 onMounted(() => {
 
     window.addEventListener("scroll", handleScroll);
 
     loadCart();
 
+    window.addEventListener("cart-updated", cartUpdated);
+
 });
 
-onUnmounted(() => {
-    window.removeEventListener("scroll", handleScroll);
-});
+
 </script>
 
 <style scoped>
