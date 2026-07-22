@@ -234,12 +234,133 @@
 
                 </h1>
 
-                <div class="empty">
+                <div v-if="currentPage === 'users'">
 
-                    Здесь будет список пользователей
+                    <h2>Пользователи</h2>
+
+                    <table class="users-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th @click="sortBy('id')">
+                                    ID
+                                </th>
+
+                                <th @click="sortBy('fullName')">
+                                    Имя
+                                </th>
+
+                                <th @click="sortBy('login')">
+                                    Логин
+                                </th>
+
+                                <th @click="sortBy('email')">
+                                    Почта
+                                </th>
+
+                                <th @click="sortBy('phone')">
+                                    Телефон
+                                </th>
+
+                                <th @click="sortBy('role')">
+                                    Роль
+                                </th>
+
+                                <th>
+                                    Действия
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr v-for="user in sortedUsers" :key="user.id">
+
+                                <td>{{ user.id }}</td>
+
+                                <td>{{ user.fullName }}</td>
+
+                                <td>{{ user.login }}</td>
+
+                                <td>{{ user.email || "—" }}</td>
+
+                                <td>{{ user.phone || "—" }}</td>
+
+                                <td>{{ user.role }}</td>
+
+                                <td class="actions">
+
+                                    <button class="edit-btn" @click="openRoleEdit(user)">
+                                        ✏️
+                                    </button>
+
+                                    <button class="delete-btn" @click="deleteUser(user.id)">
+                                        🗑
+                                    </button>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
 
                 </div>
 
+                <!-- Окно изменения роли -->
+
+                <div v-if="editRoleUser" class="modal">
+
+                    <div class="modal-window">
+
+                        <h3>
+
+                            Изменить роль пользователя
+
+                        </h3>
+
+                        <p class="edit-user-name">
+
+                            {{ editRoleUser.fullName }}
+
+                        </p>
+
+                        <select v-model="editRoleUser.roleId" class="role-select">
+
+                            <option :value="2">
+                                User
+                            </option>
+
+                            <option :value="1">
+                                Admin
+                            </option>
+
+                        </select>
+
+                        <div class="actions">
+
+                            <button class="save-btn" @click="saveRole">
+
+                                💾 Сохранить
+
+                            </button>
+
+                            <button class="cancel-btn" @click="editRoleUser = null">
+
+                                ✖ Отмена
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
             </template>
 
             <!-- Заказы -->
@@ -460,13 +581,15 @@
 import { ref, onMounted, computed } from "vue";
 import api from "@/api/api";
 
-
+const users = ref([]);
 const categories = ref([]);
 const brands = ref([]);
 const currentPage = ref("dashboard");
 const products = ref([]);
 const showAddProduct = ref(false);
 const images = ref([]);
+const sortField = ref("id");
+const sortAsc = ref(true);
 const form = ref({
 
     name: "",
@@ -508,9 +631,44 @@ const form = ref({
         network: ""
 
     }
+});
+const editRoleUser = ref(null);
+
+const roles = ref([
+    {
+        id: 1,
+        name: "User"
+    },
+    {
+        id: 2,
+        name: "Admin"
+    }
+]);
+const sortedUsers = computed(() => {
+
+    return [...users.value].sort((a, b) => {
+
+        let x = a[sortField.value];
+        let y = b[sortField.value];
+
+        if (typeof x === "string") {
+
+            x = x.toLowerCase();
+            y = y.toLowerCase();
+
+        }
+
+        if (x < y)
+            return sortAsc.value ? -1 : 1;
+
+        if (x > y)
+            return sortAsc.value ? 1 : -1;
+
+        return 0;
+
+    });
 
 });
-
 const selectedCategory = computed(() => {
 
     return categories.value.find(
@@ -520,6 +678,52 @@ const selectedCategory = computed(() => {
     );
 
 });
+function openRoleEdit(user) {
+
+    editRoleUser.value = {
+        id: user.id,
+        roleId: user.roleId
+    };
+
+}
+async function saveRole() {
+
+    console.log(editRoleUser.value);
+
+    await api.put(
+        `/users/${editRoleUser.value.id}/role`,
+        editRoleUser.value.roleId,
+        {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+    );
+
+    editRoleUser.value = null;
+
+    await loadUsers();
+
+}
+async function deleteUser(id) {
+
+    if (!confirm("Удалить пользователя?"))
+        return;
+
+
+    await api.delete(`/users/${id}`);
+
+
+    await loadUsers();
+
+}
+async function loadUsers() {
+
+    const { data } = await api.get("/users");
+
+    users.value = data;
+
+}
 
 async function loadCategories() {
 
@@ -536,7 +740,22 @@ async function loadBrands() {
     brands.value = data;
 
 }
+function sortBy(field) {
 
+    if (sortField.value === field) {
+
+        sortAsc.value = !sortAsc.value;
+
+    }
+    else {
+
+        sortField.value = field;
+
+        sortAsc.value = true;
+
+    }
+
+}
 function preview(file) {
 
     return window.URL.createObjectURL(file);
@@ -643,10 +862,66 @@ onMounted(() => {
 
     loadBrands();
 
+    loadUsers();
+
 });
 </script>
 
 <style scoped>
+.users-table th {
+
+    cursor: pointer;
+
+    user-select: none;
+
+}
+
+.users-table th:hover {
+
+    background: #1d4ed8;
+
+}
+
+.users-table {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    background: white;
+
+    border-radius: 18px;
+
+    overflow: hidden;
+
+}
+
+.users-table th {
+
+    background: #2563eb;
+
+    color: white;
+
+    padding: 16px;
+
+    text-align: left;
+
+}
+
+.users-table td {
+
+    padding: 15px;
+
+    border-bottom: 1px solid #ececec;
+
+}
+
+.users-table tr:hover {
+
+    background: #f7faff;
+
+}
+
 .modal {
 
     position: fixed;
@@ -1134,6 +1409,105 @@ h1 {
     border-radius: 14px;
 
     box-shadow: 0 5px 15px rgba(0, 0, 0, .12);
+
+}
+
+.actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    justify-content: center;
+
+}
+
+.edit-btn,
+.delete-btn,
+.save-btn,
+.cancel-btn {
+
+    padding: 10px 16px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+
+    transition: .25s;
+
+}
+
+.edit-btn {
+
+    background: #2563eb;
+
+    color: white;
+
+}
+
+.edit-btn:hover {
+
+    background: #1d4ed8;
+
+}
+
+.delete-btn,
+.cancel-btn {
+
+    background: #ef4444;
+
+    color: white;
+
+}
+
+.delete-btn:hover,
+.cancel-btn:hover {
+
+    background: #dc2626;
+
+}
+
+.save-btn {
+
+    background: #16a34a;
+
+    color: white;
+
+}
+
+.save-btn:hover {
+
+    background: #15803d;
+
+}
+
+.edit-user-name {
+
+    margin: 15px 0;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    text-align: center;
+
+}
+
+.role-select {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border-radius: 10px;
+
+    border: 1px solid #d1d5db;
+
+    margin-bottom: 20px;
 
 }
 </style>

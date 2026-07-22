@@ -165,7 +165,7 @@ onMounted(() => {
 
     border-radius: 14px;
 
-    background: #111827;
+    background: #000000;
 
     color: white;
 
