@@ -91,7 +91,97 @@
                 </div>
 
             </div>
+            <div class="profile-section">
 
+                <button class="orders-toggle" @click="showOrders = !showOrders">
+
+                    📦 Мои заказы
+
+                    <span>
+
+                        {{ showOrders ? "▲" : "▼" }}
+
+                    </span>
+
+                </button>
+
+                <div v-if="showOrders" class="orders-list">
+
+                    <div v-if="orders.length" v-for="order in orders" :key="order.id" class="order-card">
+
+                        <div class="order-header" @click="toggleOrder(order.id)">
+
+                            <div>
+
+                                <strong>
+
+                                    Заказ №{{ order.id }}
+
+                                </strong>
+
+                                <p>
+
+                                    {{ formatDate(order.orderDate) }}
+
+                                </p>
+
+                            </div>
+
+                            <div class="order-right">
+
+                                <span class="status">
+
+                                    {{ order.status }}
+
+                                </span>
+
+                                <strong>
+
+                                    {{ order.totalPrice.toLocaleString() }} ₽
+
+                                </strong>
+
+                                <div>
+
+                                    {{ openedOrder === order.id ? "▲" : "▼" }}
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div v-if="openedOrder === order.id" class="order-items">
+
+                            <div v-for="item in order.items" :key="item.productId" class="order-item">
+
+                                <span>
+
+                                    {{ item.productName }}
+
+                                </span>
+
+                                <span>
+
+                                    {{ item.quantity }} × {{ item.price.toLocaleString() }} ₽
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <p v-else class="empty-orders">
+
+                        У вас пока нет заказов
+
+                    </p>
+
+                </div>
+
+            </div>
             <div class="buttons">
 
                 <button class="edit">
@@ -116,13 +206,27 @@
 
 <script setup>
 import api from "@/api/api";
-import { computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
 const auth = useAuthStore();
 const router = useRouter();
+const orders = ref([]);
+const showOrders = ref(false);
+const openedOrder = ref(null);
 
+function toggleOrder(id) {
+
+    if (openedOrder.value === id)
+
+        openedOrder.value = null;
+
+    else
+
+        openedOrder.value = id;
+
+}
 const firstLetter = computed(() => {
 
     if (!auth.user?.fullName)
@@ -151,7 +255,7 @@ function logout() {
 
 async function uploadAvatar(e) {
 
-     console.log("Файл выбран");
+    console.log("Файл выбран");
     const file = e.target.files[0];
 
     if (!file)
@@ -162,14 +266,38 @@ async function uploadAvatar(e) {
     form.append("file", file);
 
     await api.post("/users/avatar", form, {
-    headers: {
-        "Content-Type": "multipart/form-data"
-    }
-});
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    });
 
     await auth.fetchUser();
-console.log(auth.user);
+    console.log(auth.user);
 }
+
+async function loadOrders() {
+
+    if (!auth.user)
+        return;
+
+    const { data } = await api.get(
+        `/orders/user/${auth.user.id}/details`
+    );
+
+    orders.value = data;
+
+}
+
+function formatDate(date) {
+
+    return new Date(date).toLocaleDateString("ru-RU");
+
+}
+onMounted(() => {
+
+    loadOrders();
+
+});
 </script>
 
 <style scoped>
@@ -430,6 +558,152 @@ h1 {
     background: #ef4444;
 
     color: white;
+
+}
+
+.orders {
+
+    margin-top: 50px;
+
+}
+
+.orders h2 {
+
+    margin-bottom: 20px;
+
+}
+
+.order-card {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 20px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 14px;
+
+    margin-bottom: 15px;
+
+    background: white;
+
+}
+
+.order-right {
+
+    text-align: right;
+
+}
+
+.status {
+
+    display: inline-block;
+
+    padding: 5px 12px;
+
+    border-radius: 20px;
+
+    background: #dbeafe;
+
+    color: #2563eb;
+
+    font-size: 14px;
+
+    margin-bottom: 8px;
+
+}
+
+.order-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    cursor: pointer;
+
+}
+
+.order-items {
+
+    margin-top: 18px;
+
+    border-top: 1px solid #ececec;
+
+    padding-top: 15px;
+
+}
+
+.order-item {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    padding: 8px 0;
+
+}
+
+.profile-section {
+
+    margin-top: 40px;
+
+}
+
+.orders-toggle {
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 18px 22px;
+
+    background: #fff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 16px;
+
+    cursor: pointer;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    transition: .25s;
+
+}
+
+.orders-toggle:hover {
+
+    background: #f8fafc;
+
+    border-color: #2563eb;
+
+}
+
+.orders-list {
+
+    margin-top: 20px;
+
+}
+
+.empty-orders {
+
+    padding: 25px;
+
+    text-align: center;
+
+    color: #64748b;
 
 }
 

@@ -156,7 +156,7 @@
               <textarea id="message" v-model="form.message" rows="4" placeholder="Опишите вашу проблему..."></textarea>
             </div>
 
-            <button type="submit" class="submit-btn" :disabled="isSubmitting">
+            <button type="submit" class="submit-btn" :disabled="isSubmitting" @click="sendRepair">
               {{ isSubmitting ? 'Отправка...' : 'Отправить заявку' }}
             </button>
           </form>
@@ -177,9 +177,55 @@
 </template>
 
 <script>
+import { createApp } from "vue";
+import { createPinia } from "pinia";
 import axios from "axios";
 import { useRoute } from "vue-router";
 import api from "@/api/api";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
+
+async function sendRepair() {
+
+  try {
+
+    await api.post("/repairs", {
+
+      userId: auth.user.id,
+
+      deviceType: form.value.service,
+
+      brand: form.value.brand,
+
+      model: form.value.model,
+
+      problem: form.value.message
+
+    });
+
+
+    alert("Заявка успешно отправлена");
+
+
+    form.value = {
+      service: "",
+      brand: "",
+      model: "",
+      message: ""
+    };
+
+
+  }
+  catch (e) {
+
+    console.error(e);
+
+    alert("Ошибка отправки заявки");
+
+  }
+
+}
 
 export default {
   name: 'Contacts',
@@ -249,7 +295,18 @@ export default {
           "http://localhost:5001/send",
           this.form
         );
+        await api.post("/repairs", {
+          userId: auth.user?.id ?? null,
 
+          clientName: this.form.name,
+          clientPhone: this.form.phone,
+          clientEmail: this.form.email,
+
+          deviceType: this.form.service,
+          brand: this.form.brand,
+          model: this.form.model,
+          problem: this.form.message
+        });
         alert(
           "Спасибо! Ваша заявка успешно отправлена.\nМы свяжемся с вами в ближайшее время!"
         );
@@ -529,71 +586,71 @@ export default {
   color: #999;
 }
 
-.selected-service{
+.selected-service {
 
-    display:flex;
+  display: flex;
 
-    justify-content:space-between;
+  justify-content: space-between;
 
-    align-items:center;
+  align-items: center;
 
-    padding:8px 18px;
+  padding: 8px 18px;
 
-    border:1px solid #dbe3ee;
+  border: 1px solid #dbe3ee;
 
-    border-radius:12px;
+  border-radius: 12px;
 
-    background:#f8fafc;
+  background: #f8fafc;
 
-    transition:.25s;
-
-}
-
-.selected-service:hover{
-
-    border-color:#2563eb;
+  transition: .25s;
 
 }
 
-.selected-service span{
+.selected-service:hover {
 
-    font-size:15px;
-
-    font-weight:600;
-
-    color:#1e293b;
+  border-color: #2563eb;
 
 }
 
-.change-service{
+.selected-service span {
 
-    border:1px solid #dbe3ee;
+  font-size: 15px;
 
-    background:white;
+  font-weight: 600;
 
-    color:#2563eb;
-
-    padding:8px 16px;
-
-    border-radius:10px;
-
-    cursor:pointer;
-
-    font-size:14px;
-
-    font-weight:600;
-
-    transition:.25s;
+  color: #1e293b;
 
 }
 
-.change-service:hover{
+.change-service {
 
-    border-color:#2563eb;
+  border: 1px solid #dbe3ee;
 
-    background:#2563eb;
+  background: white;
 
-    color:white;
+  color: #2563eb;
+
+  padding: 8px 16px;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  transition: .25s;
+
+}
+
+.change-service:hover {
+
+  border-color: #2563eb;
+
+  background: #2563eb;
+
+  color: white;
 
 }
 

@@ -119,7 +119,7 @@
 
                     </div>
 
-                    <button class="checkout">
+                    <button class="checkout" @click="checkout">
 
                         Оформить заказ
 
@@ -137,6 +137,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import api from "@/api/api";
+import { useAuthStore } from "@/stores/auth";
+
+const auth = useAuthStore();
 
 const cart = ref({
 
@@ -145,7 +148,30 @@ const cart = ref({
     total: 0
 
 });
+async function checkout() {
 
+    try {
+
+        await api.post("/orders/checkout", {
+
+            userId: auth.user.id
+
+        });
+
+        alert("Заказ успешно оформлен!");
+
+        location.reload();
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+        alert("Ошибка оформления заказа");
+
+    }
+
+}
 async function remove(item) {
 
     await api.delete(
@@ -153,7 +179,7 @@ async function remove(item) {
         `/cart/${item.productId}`
 
     );
-window.dispatchEvent(new Event("cart-updated"));
+    window.dispatchEvent(new Event("cart-updated"));
     loadCart();
 
 }

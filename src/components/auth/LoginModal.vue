@@ -19,6 +19,8 @@
 
             <input v-if="isRegister" v-model="email" placeholder="Email" />
 
+            <input v-if="isRegister" v-model="phone" placeholder="+7 (999) 123-45-67" />
+
             <input v-model="login" placeholder="Логин" />
 
             <input v-model="password" type="password" placeholder="Пароль" />
@@ -74,22 +76,15 @@ import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
 
 const emit = defineEmits(["close"]);
-
 const auth = useAuthStore();
-
 const login = ref("");
-
 const password = ref("");
-
 const loading = ref(false);
-
 const error = ref("");
-
 const isRegister = ref(false);
-
 const email = ref("");
-
 const fullName = ref("");
+const phone = ref("");
 
 async function loginUser() {
 
@@ -124,11 +119,23 @@ async function loginUser() {
     }
 
 }
+
 async function registerUser() {
 
     loading.value = true;
 
     error.value = "";
+
+    // Проверка телефона
+    if (!/^\+?[0-9()\-\s]{10,20}$/.test(phone.value)) {
+
+        error.value = "Введите корректный номер телефона";
+
+        loading.value = false;
+
+        return;
+
+    }
 
     try {
 
@@ -139,6 +146,8 @@ async function registerUser() {
             password: password.value,
 
             email: email.value,
+
+            phone: phone.value,
 
             fullName: fullName.value
 
