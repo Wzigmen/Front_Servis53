@@ -236,8 +236,6 @@
 
                 <div v-if="currentPage === 'users'">
 
-                    <h2>Пользователи</h2>
-
                     <table class="users-table">
 
                         <thead>
@@ -374,8 +372,6 @@
                 </h1>
 
                 <div v-if="currentPage === 'orders'">
-
-                    <h2>Заказы</h2>
 
                     <table class="users-table">
 

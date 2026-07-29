@@ -2,7 +2,6 @@
     <div class="card" ref="card" @mousemove="move" @mouseleave="leave" @click="openProduct">
 
         <div class="glare" :style="glareStyle"></div>
-
         <div class="image">
 
             <img v-if="image" :src="image" :alt="product.name">
@@ -39,20 +38,34 @@
 
             </div>
 
-            <button @mouseenter="enterButton" @mouseleave="leaveButton" @click="addToCart">
-                🛒 В корзину
-            </button>
+            <div class="actions">
 
+                <button class="cart-btn" @mouseenter="enterButton" @mouseleave="leaveButton" @click.stop="addToCart">
+
+                    🛒 В корзину
+
+                </button>
+
+                <button class="favorite-btn" @click.stop="toggleFavorite">
+                    <Heart :size="22" :fill="isFavorite ? '#ef4444' : 'none'"
+                        :color="isFavorite ? '#ef4444' : '#888'" />
+                </button>
+
+            </div>
         </div>
 
     </div>
 </template>
 
 <script setup>
-import { computed, ref } from "vue";
+import { Heart } from "lucide-vue-next";
+import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import api from "@/api/api";
 
+const auth = useAuthStore();
+const isFavorite = ref(false);
 const router = useRouter();
 const props = defineProps({
     product: Object
@@ -83,7 +96,15 @@ async function addToCart() {
             quantity: 1
 
         });
-        window.dispatchEvent(new Event("cart-updated"));
+        window.addEventListener("favorites-updated", async () => {
+
+            if (!auth.user) return;
+
+            const { data } = await api.get(`/favorites/${auth.user.id}`);
+
+            isFavorite.value = data.some(x => x.id === props.product.id);
+
+        });
         alert("Товар добавлен в корзину");
 
     }
@@ -95,7 +116,53 @@ async function addToCart() {
         console.log(e.response?.status);
 
         console.log(e.response?.data);
+        console.log(e.response.data.errors);
         alert("Необходимо войти");
+
+    }
+
+}
+async function toggleFavorite() {
+
+    if (!auth.user) {
+
+        alert("Необходимо войти");
+
+        return;
+
+    }
+
+    try {
+
+        if (isFavorite.value) {
+
+            await api.delete(`/favorites/${auth.user.id}/${props.product.id}`);
+
+            isFavorite.value = false;
+
+        } else {
+
+            await api.post("/favorites", {
+
+                userId: auth.user.id,
+
+                productId: props.product.id
+
+            });
+
+            isFavorite.value = true;
+
+        }
+
+        window.dispatchEvent(new Event("favorites-updated"));
+
+    }
+    catch (e) {
+        console.log(e.response?.status);
+        console.log(e.response?.data);
+        console.log(e.response.data.errors);
+        console.log(JSON.stringify(e.response.data.errors, null, 2));
+        console.error(e);
 
     }
 
@@ -133,6 +200,22 @@ function enterButton() {
 function leaveButton() {
     freeze.value = false;
 }
+
+onMounted(async () => {
+
+    if (!auth.user)
+        return;
+
+    try {
+
+        const { data } = await api.get(`/favorites/${auth.user.id}`);
+
+        isFavorite.value = data.some(x => x.id === props.product.id);
+
+    }
+    catch { }
+
+});
 </script>
 
 <style scoped>
@@ -312,6 +395,50 @@ button:hover {
 button:hover {
 
     background: #1e4fd8;
+
+}
+
+.actions {
+
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+
+}
+
+.cart-btn {
+
+    flex: 1;
+
+}
+
+.favorite-btn {
+
+    width: 56px;
+    min-width: 56px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    border-radius: 14px;
+
+    background: #f5f5f5;
+    color: #ef4444;
+
+    font-size: 22px;
+    cursor: pointer;
+
+    transition: .25s;
+
+}
+
+.favorite-btn:hover {
+
+    background: #ffe6ea;
+
+    transform: translateY(-2px);
 
 }
 

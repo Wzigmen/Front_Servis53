@@ -76,10 +76,8 @@
 
                         </button>
 
-                        <button class="cart">
-
-                            ❤ В избранное
-
+                        <button class="cart" :class="{ active: isFavorite }" @click="toggleFavorite">
+                            {{ isFavorite ? "❤️ В избранном" : "🤍 В избранное" }}
                         </button>
 
                     </div>
@@ -160,7 +158,11 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import api from "@/api/api";
+
+const auth = useAuthStore();
+const isFavorite = ref(false);
 
 const route = useRoute();
 
@@ -175,8 +177,15 @@ async function load() {
     product.value = data;
 
     if (data.images.length)
-
         currentImage.value = image(data.images[0]);
+
+    if (auth.user) {
+
+        const { data } = await api.get(`/favorites/${auth.user.id}`);
+
+        isFavorite.value = data.some(x => x.id === product.value.id);
+
+    }
 
 }
 async function addToCart() {
@@ -202,7 +211,43 @@ async function addToCart() {
     }
 
 }
+async function toggleFavorite() {
 
+    if (!auth.user) {
+
+        alert("Необходимо войти");
+        return;
+
+    }
+
+    try {
+
+        if (isFavorite.value) {
+
+            await api.delete(`/favorites/${auth.user.id}/${product.value.id}`);
+            isFavorite.value = false;
+
+        } else {
+
+            await api.post("/favorites", {
+                userId: auth.user.id,
+                productId: product.value.id
+            });
+
+            isFavorite.value = true;
+
+        }
+
+        window.dispatchEvent(new Event("favorites-updated"));
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+    }
+
+}
 function image(name) {
 
     return `http://localhost:5263/images/products/${product.value.id}/${name}`;
@@ -254,6 +299,21 @@ onMounted(load);
 </script>
 
 <style scoped>
+
+.cart.active {
+
+    background: #ef4444;
+    border-color: #ef4444;
+    color: white;
+
+}
+
+.cart.active:hover {
+
+    background: #dc2626;
+    border-color: #dc2626;
+
+}
 .product-page {
 
     padding: 40px 0;

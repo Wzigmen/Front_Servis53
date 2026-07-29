@@ -177,14 +177,12 @@
 </template>
 
 <script>
-import { createApp } from "vue";
-import { createPinia } from "pinia";
-import axios from "axios";
-import { useRoute } from "vue-router";
+// import { createApp } from "vue";
+// import { createPinia } from "pinia";
+// import axios from "axios";
+// import { useRoute } from "vue-router";
 import api from "@/api/api";
 import { useAuthStore } from "@/stores/auth";
-
-const auth = useAuthStore();
 
 async function sendRepair() {
 
@@ -192,7 +190,7 @@ async function sendRepair() {
 
     await api.post("/repairs", {
 
-      userId: auth.user.id,
+      userId: this.auth.user.id,
 
       deviceType: form.value.service,
 
@@ -231,27 +229,36 @@ export default {
   name: 'Contacts',
   data() {
     return {
+      auth: useAuthStore(),
+
       form: {
-        name: '',
-        phone: '',
-        email: '',
-        service: '',
-        message: ''
+        name: "",
+        phone: "",
+        email: "",
+        service: "",
+        brand: "",
+        model: "",
+        message: ""
       },
+
       errors: {},
       isSubmitting: false
-    }
-
+    };
   },
   mounted() {
+  console.log(this.auth.user);
+  console.log(JSON.stringify(this.auth.user, null, 2));
+  if (this.$route.query.service) {
+    this.form.service = this.$route.query.service;
+  }
 
-    if (this.$route.query.service) {
+  if (this.auth.user) {
+    this.form.name = this.auth.user.fullName;
+    this.form.phone = this.auth.user.phone;
+    this.form.email = this.auth.user.email;
+  }
 
-      this.form.service = this.$route.query.service;
-
-    }
-
-  },
+},
   methods: {
     validateForm() {
       this.errors = {}
@@ -282,6 +289,7 @@ export default {
     },
 
     async submitForm() {
+      const auth = useAuthStore();
 
       if (!this.validateForm()) {
         return;
@@ -296,7 +304,7 @@ export default {
           this.form
         );
         await api.post("/repairs", {
-          userId: auth.user?.id ?? null,
+          userId: this.auth.user?.id ?? null,
 
           clientName: this.form.name,
           clientPhone: this.form.phone,
@@ -335,6 +343,7 @@ export default {
 
     }
   }
+  
 }
 </script>
 

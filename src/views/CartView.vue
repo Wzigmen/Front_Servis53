@@ -140,7 +140,6 @@ import api from "@/api/api";
 import { useAuthStore } from "@/stores/auth";
 
 const auth = useAuthStore();
-
 const cart = ref({
 
     items: [],

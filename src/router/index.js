@@ -8,6 +8,7 @@ import Profile from "@/views/Profile.vue";
 import Login from "@/views/Login.vue";
 import AdminView from "@/views/Admin/AdminView.vue";
 import CartView from "@/views/CartView.vue";
+import Favorites from "@/views/Favorites.vue";
 
 import { useAuthStore } from "@/stores/auth";
 
@@ -68,6 +69,14 @@ const routes = [
         requiresAuth: true
     }
 },
+  {
+    path: "/favorites",
+    name: "Favorites",
+    component: Favorites,
+    meta: {
+        requiresAuth: true
+    }
+}
 ];
 
 // Потом создаем router

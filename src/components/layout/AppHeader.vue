@@ -23,9 +23,15 @@
             <!-- Правая часть -->
             <div class="actions">
 
-                <button class="icon-btn">
+                <RouterLink to="/favorites" class="icon-btn" >
+
                     <Heart :size="20" />
-                </button>
+
+                    <!-- <span v-if="favoritesCount > 0" class="cart-count">
+                        {{ favoritesCount }}
+                    </span> -->
+
+                </RouterLink>
 
                 <RouterLink to="/cart" class="icon-btn cart-btn">
 
@@ -58,12 +64,14 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { Search, Heart, ShoppingCart, User } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth";
+import { Search, Heart, ShoppingCart, User } from "lucide-vue-next";
 import LoginModal from "@/components/auth/LoginModal.vue";
 import api from "@/api/api";
 
 const auth = useAuthStore();
+const favorites = ref([]);
+const favoritesCount = computed(() => favorites.value.length);
 const cart = ref({
     items: []
 });
@@ -105,16 +113,27 @@ async function loadCart() {
     }
 
 }
+async function loadFavorites() {
+
+    if (!auth.user)
+        return;
+
+    const { data } = await api.get(`/favorites/${auth.user.id}`);
+
+    favorites.value = data;
+
+}
 function cartUpdated() {
 
     loadCart();
 
 }
-onMounted(() => {
+onMounted(async () => {
 
     window.addEventListener("scroll", handleScroll);
 
     loadCart();
+    await loadFavorites();
 
     window.addEventListener("cart-updated", cartUpdated);
 
@@ -124,41 +143,42 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.cart-btn{
+.cart-btn {
 
-    position:relative;
+    position: relative;
+
+}
+
+.cart-count {
+
+    position: absolute;
+
+    top: -6px;
+
+    right: -6px;
+
+    width: 20px;
+
+    height: 20px;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: white;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 12px;
+
+    font-weight: 700;
 
 }
 
-.cart-count{
-
-    position:absolute;
-
-    top:-6px;
-
-    right:-6px;
-
-    width:20px;
-
-    height:20px;
-
-    border-radius:50%;
-
-    background:#2563eb;
-
-    color:white;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    font-size:12px;
-
-    font-weight:700;
-
-}
 .admin-btn {
 
     padding: 12px 22px;
