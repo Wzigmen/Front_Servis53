@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { login, register, getMe } from "@/api/auth";
-import AdminView from "@/views/Admin/AdminView.vue";
+
+let userPromise = null;
 
 export const useAuthStore = defineStore("auth", {
 
@@ -8,11 +9,17 @@ export const useAuthStore = defineStore("auth", {
 
         token: localStorage.getItem("token"),
 
-        user: null,
-
-        isAuthenticated: !!localStorage.getItem("token")
+        user: null
 
     }),
+
+    getters: {
+
+        isAuthenticated: state => !!state.token,
+
+        isAdmin: state => state.user?.role === "Admin"
+
+    },
 
     actions: {
 
@@ -24,9 +31,7 @@ export const useAuthStore = defineStore("auth", {
 
             localStorage.setItem("token", this.token);
 
-            this.isAuthenticated = true;
-
-            await this.fetchUser();
+            this.user = response.data.user;
         },
 
         async register(data) {
@@ -43,18 +48,28 @@ export const useAuthStore = defineStore("auth", {
 
         },
 
+        // Загружает пользователя по сохранённому токену (один раз, даже при параллельных вызовах)
+        async ensureUser() {
+
+            if (!this.token || this.user)
+                return;
+
+            userPromise ??= this.fetchUser()
+                .catch(() => this.logout())
+                .finally(() => { userPromise = null; });
+
+            await userPromise;
+        },
+
         logout() {
 
             this.token = null;
 
             this.user = null;
 
-            this.isAuthenticated = false;
-
             localStorage.removeItem("token");
 
-        },
-        
+        }
 
     }
 

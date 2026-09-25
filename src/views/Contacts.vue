@@ -156,7 +156,7 @@
               <textarea id="message" v-model="form.message" rows="4" placeholder="Опишите вашу проблему..."></textarea>
             </div>
 
-            <button type="submit" class="submit-btn" :disabled="isSubmitting" @click="sendRepair">
+            <button type="submit" class="submit-btn" :disabled="isSubmitting">
               {{ isSubmitting ? 'Отправка...' : 'Отправить заявку' }}
             </button>
           </form>
@@ -177,52 +177,20 @@
 </template>
 
 <script>
-// import { createApp } from "vue";
-// import { createPinia } from "pinia";
-// import axios from "axios";
-// import { useRoute } from "vue-router";
-import api from "@/api/api";
 import { useAuthStore } from "@/stores/auth";
+import { createRepair, notifyTelegram } from "@/api/repairs";
+import { errorMessage } from "@/api/api";
 
-async function sendRepair() {
-
-  try {
-
-    await api.post("/repairs", {
-
-      userId: this.auth.user.id,
-
-      deviceType: form.value.service,
-
-      brand: form.value.brand,
-
-      model: form.value.model,
-
-      problem: form.value.message
-
-    });
-
-
-    alert("Заявка успешно отправлена");
-
-
-    form.value = {
-      service: "",
-      brand: "",
-      model: "",
-      message: ""
-    };
-
-
-  }
-  catch (e) {
-
-    console.error(e);
-
-    alert("Ошибка отправки заявки");
-
-  }
-
+function emptyForm() {
+  return {
+    name: "",
+    phone: "",
+    email: "",
+    service: "",
+    brand: "",
+    model: "",
+    message: ""
+  };
 }
 
 export default {
@@ -230,36 +198,32 @@ export default {
   data() {
     return {
       auth: useAuthStore(),
-
-      form: {
-        name: "",
-        phone: "",
-        email: "",
-        service: "",
-        brand: "",
-        model: "",
-        message: ""
-      },
-
+      form: emptyForm(),
       errors: {},
       isSubmitting: false
     };
   },
   mounted() {
-  console.log(this.auth.user);
-  console.log(JSON.stringify(this.auth.user, null, 2));
-  if (this.$route.query.service) {
-    this.form.service = this.$route.query.service;
-  }
+    console.log(this.auth.user);
+    console.log(JSON.stringify(this.auth.user, null, 2));
 
-  if (this.auth.user) {
-    this.form.name = this.auth.user.fullName;
-    this.form.phone = this.auth.user.phone;
-    this.form.email = this.auth.user.email;
-  }
+    if (this.$route.query.service) {
+      this.form.service = this.$route.query.service;
+    }
 
-},
+    this.fillFromUser();
+  },
   methods: {
+    // подставляем данные вошедшего пользователя
+    fillFromUser() {
+      if (!this.auth.user)
+        return;
+
+      this.form.name = this.auth.user.fullName ?? "";
+      this.form.phone = this.auth.user.phone ?? "";
+      this.form.email = this.auth.user.email ?? "";
+    },
+
     validateForm() {
       this.errors = {}
       let isValid = true
@@ -275,7 +239,7 @@ export default {
       if (!this.form.phone.trim()) {
         this.errors.phone = 'Введите телефон'
         isValid = false
-      } else if (!/^[\d\s\+\-\(\)]+$/.test(this.form.phone)) {
+      } else if (!/^[\d\s\+\-\(\)]{6,20}$/.test(this.form.phone)) {
         this.errors.phone = 'Введите корректный номер телефона'
         isValid = false
       }
@@ -289,8 +253,6 @@ export default {
     },
 
     async submitForm() {
-      const auth = useAuthStore();
-
       if (!this.validateForm()) {
         return;
       }
@@ -298,52 +260,41 @@ export default {
       this.isSubmitting = true;
 
       try {
-
-        await api.post(
-          "http://localhost:5001/send",
-          this.form
-        );
-        await api.post("/repairs", {
-          userId: this.auth.user?.id ?? null,
-
+        // сначала сохраняем заявку в БД — она не должна теряться, если бот недоступен
+        await createRepair({
           clientName: this.form.name,
           clientPhone: this.form.phone,
-          clientEmail: this.form.email,
-
+          clientEmail: this.form.email || null,
           deviceType: this.form.service,
           brand: this.form.brand,
           model: this.form.model,
           problem: this.form.message
         });
-        alert(
-          "Спасибо! Ваша заявка успешно отправлена.\nМы свяжемся с вами в ближайшее время!"
-        );
-
-        this.form = {
-          name: "",
-          phone: "",
-          email: "",
-          service: "",
-          message: ""
-        };
-
       }
       catch (e) {
-
         console.error(e);
-
-        alert("Не удалось отправить заявку.");
-
-      }
-      finally {
-
+        alert(errorMessage(e, "Не удалось отправить заявку."));
         this.isSubmitting = false;
-
+        return;
       }
 
+      try {
+        await notifyTelegram(this.form);
+      }
+      catch (e) {
+        // заявка уже сохранена, ошибку уведомления пользователю не показываем
+        console.error(e);
+      }
+
+      alert(
+        "Спасибо! Ваша заявка успешно отправлена.\nМы свяжемся с вами в ближайшее время!"
+      );
+
+      this.form = emptyForm();
+      this.fillFromUser();
+      this.isSubmitting = false;
     }
   }
-  
 }
 </script>
 

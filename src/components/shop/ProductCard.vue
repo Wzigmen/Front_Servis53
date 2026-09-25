@@ -1,7 +1,8 @@
 <template>
     <div class="card" ref="card" @mousemove="move" @mouseleave="leave" @click="openProduct">
 
-        <div class="glare" :style="glareStyle"></div>
+        <div class="glare"></div>
+
         <div class="image">
 
             <img v-if="image" :src="image" :alt="product.name">
@@ -32,15 +33,20 @@
 
             <div class="stock">
 
-                <span class="available">
+                <span v-if="inStock" class="available">
                     ● В наличии
+                </span>
+
+                <span v-else class="unavailable">
+                    ● Нет в наличии
                 </span>
 
             </div>
 
             <div class="actions">
 
-                <button class="cart-btn" @mouseenter="enterButton" @mouseleave="leaveButton" @click.stop="addToCart">
+                <button class="cart-btn" :disabled="!inStock" @mouseenter="enterButton" @mouseleave="leaveButton"
+                    @click.stop="addToCart">
 
                     🛒 В корзину
 
@@ -59,117 +65,88 @@
 
 <script setup>
 import { Heart } from "lucide-vue-next";
-import { computed, ref, onMounted } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import api from "@/api/api";
+import { useCartStore } from "@/stores/cart";
+import { useFavoritesStore } from "@/stores/favorites";
+import { productImageUrl, errorMessage } from "@/api/api";
+
+const props = defineProps({
+    product: {
+        type: Object,
+        required: true
+    }
+});
 
 const auth = useAuthStore();
-const isFavorite = ref(false);
+const cart = useCartStore();
+const favorites = useFavoritesStore();
 const router = useRouter();
-const props = defineProps({
-    product: Object
-});
 
 const card = ref(null);
-
-const glareStyle = ref({});
 const freeze = ref(false);
 
-const image = computed(() => {
+const image = computed(() => productImageUrl(props.product.id, props.product.images?.[0]));
 
-    if (!props.product.images || props.product.images.length === 0)
-        return null;
+const inStock = computed(() => props.product.quantity > 0);
 
-    return `http://localhost:5263/images/products/${props.product.id}/${props.product.images[0]}`;
-
-});
+const isFavorite = computed(() => favorites.has(props.product.id));
 
 async function addToCart() {
 
+    if (!auth.isAuthenticated) {
+        alert("Необходимо войти");
+        return;
+    }
+
     try {
 
-        await api.post("/cart/add", {
+        await cart.add(props.product.id);
 
-            productId: props.product.id,
-
-            quantity: 1
-
-        });
-        window.addEventListener("favorites-updated", async () => {
-
-            if (!auth.user) return;
-
-            const { data } = await api.get(`/favorites/${auth.user.id}`);
-
-            isFavorite.value = data.some(x => x.id === props.product.id);
-
-        });
         alert("Товар добавлен в корзину");
 
     }
-
-    catch {
+    catch (e) {
 
         console.error(e);
 
         console.log(e.response?.status);
 
         console.log(e.response?.data);
-        console.log(e.response.data.errors);
-        alert("Необходимо войти");
+
+        alert(errorMessage(e, "Не удалось добавить товар в корзину"));
 
     }
 
 }
+
 async function toggleFavorite() {
 
-    if (!auth.user) {
-
+    if (!auth.isAuthenticated) {
         alert("Необходимо войти");
-
         return;
-
     }
 
     try {
 
-        if (isFavorite.value) {
-
-            await api.delete(`/favorites/${auth.user.id}/${props.product.id}`);
-
-            isFavorite.value = false;
-
-        } else {
-
-            await api.post("/favorites", {
-
-                userId: auth.user.id,
-
-                productId: props.product.id
-
-            });
-
-            isFavorite.value = true;
-
-        }
-
-        window.dispatchEvent(new Event("favorites-updated"));
+        await favorites.toggle(props.product.id);
 
     }
     catch (e) {
+
         console.log(e.response?.status);
         console.log(e.response?.data);
-        console.log(e.response.data.errors);
-        console.log(JSON.stringify(e.response.data.errors, null, 2));
         console.error(e);
 
     }
 
 }
+
 function openProduct() {
     router.push(`/product/${props.product.id}`);
 }
+
 function move() {
 
     if (freeze.value)
@@ -188,6 +165,7 @@ function leave() {
         "perspective(900px) translateZ(0) translateY(0)";
 
 }
+
 function enterButton() {
 
     freeze.value = true;
@@ -200,22 +178,6 @@ function enterButton() {
 function leaveButton() {
     freeze.value = false;
 }
-
-onMounted(async () => {
-
-    if (!auth.user)
-        return;
-
-    try {
-
-        const { data } = await api.get(`/favorites/${auth.user.id}`);
-
-        isFavorite.value = data.some(x => x.id === props.product.id);
-
-    }
-    catch { }
-
-});
 </script>
 
 <style scoped>
@@ -350,6 +312,14 @@ h3 {
 
 }
 
+.unavailable {
+
+    color: #94a3b8;
+
+    font-weight: 600;
+
+}
+
 button {
 
     width: 100%;
@@ -378,7 +348,9 @@ button {
 
 }
 
-button:hover {
+.cart-btn:hover:not(:disabled) {
+
+    background: #1e4fd8;
 
     transform: translateY(-2px) scale(1.03);
 
@@ -391,10 +363,11 @@ button:hover {
 
 }
 
+.cart-btn:disabled {
 
-button:hover {
+    background: #cbd5e1;
 
-    background: #1e4fd8;
+    cursor: not-allowed;
 
 }
 

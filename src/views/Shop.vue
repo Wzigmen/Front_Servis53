@@ -108,6 +108,10 @@
                             Сначала дешевле
                         </option>
 
+                        <option value="name">
+                            По названию
+                        </option>
+
                         <option value="priceDesc">
                             Сначала дороже
                         </option>
@@ -117,15 +121,17 @@
 
 
 
-                <!-- Тут потом будет ProductGrid -->
+                <div v-if="!loading && products.length === 0" class="empty-products">
+                    Товары не найдены
+                </div>
 
-                <div class="products-grid">
+                <div v-else class="products-grid">
 
                     <ProductCard v-for="product in products" :key="product.id" :product="product" />
 
                 </div>
 
-                <div class="pagination">
+                <div v-if="totalPages > 1" class="pagination">
 
                     <button :disabled="filters.page === 1" @click="filters.page--">
                         ←
@@ -155,37 +161,54 @@
 <script setup>
 import ProductCard from "@/components/shop/ProductCard.vue";
 import { ref, onMounted, watch, computed } from "vue";
-import api from "@/api/api";
+import { getProducts, getCategories, getBrands } from "@/api/products";
 
+const PAGE_SIZE = 12;
 
 const products = ref([]);
 const categories = ref([]);
 const brands = ref([]);
 const total = ref(0);
-const totalPages = computed(() => {
-
-    return Math.ceil(
-        total.value / filters.value.pageSize
-    );
-
-});
 const loading = ref(false);
 
-const filters = ref({
-    search: "",
-    categoryId: null,
-    brandId: null,
-    minPrice: null,
-    maxPrice: null,
-    sort: "",
-    page: 1,
-    pageSize: 12
-});
+const filters = ref(defaultFilters());
+
+const totalPages = computed(() => Math.ceil(total.value / PAGE_SIZE));
+
+function defaultFilters() {
+    return {
+        search: "",
+        categoryId: null,
+        brandId: null,
+        minPrice: null,
+        maxPrice: null,
+        sort: "",
+        page: 1
+    };
+}
+
+// защита от устаревших ответов: показываем только результат последнего запроса
+let requestId = 0;
 
 async function loadProducts() {
+
+    const current = ++requestId;
+
     loading.value = true;
+
     try {
-        const { data } = await api.get("/products", { params: filters.value });
+
+        // пустые поля (например, очищенная цена) не отправляем
+        const params = Object.fromEntries(
+            Object.entries({ ...filters.value, pageSize: PAGE_SIZE })
+                .filter(([, value]) => value !== null && value !== "")
+        );
+
+        const { data } = await getProducts(params);
+
+        if (current !== requestId)
+            return;
+
         products.value = data.products;
         total.value = data.total;
     }
@@ -193,13 +216,14 @@ async function loadProducts() {
         console.error(err);
     }
     finally {
-        loading.value = false;
+        if (current === requestId)
+            loading.value = false;
     }
 }
 
 async function loadCategories() {
     try {
-        const { data } = await api.get("/categories");
+        const { data } = await getCategories();
         categories.value = data;
     }
     catch (err) {
@@ -209,7 +233,7 @@ async function loadCategories() {
 
 async function loadBrands() {
     try {
-        const { data } = await api.get("/brands");
+        const { data } = await getBrands();
         brands.value = data;
     }
     catch (err) {
@@ -218,36 +242,34 @@ async function loadBrands() {
 }
 
 function resetFilters() {
-    filters.value = {
-        search: "",
-        categoryId: null,
-        brandId: null,
-        minPrice: null,
-        maxPrice: null,
-        sort: "",
-        page: 1,
-        pageSize: 12
-    };
+    filters.value = defaultFilters();
 }
 
-function imageUrl(product) {
-    if (!product.images || product.images.length === 0)
-        return null;
+// при смене любого фильтра, кроме страницы, возвращаемся на первую страницу
+watch(
+    () => {
+        const { page, ...rest } = filters.value;
+        return JSON.stringify(rest);
+    },
+    () => {
+        filters.value.page = 1;
+    }
+);
 
-    return `http://localhost:5263/images/products/${product.id}/${product.images[0]}`;
-}
+// поиск по вводу — с небольшой задержкой, чтобы не слать запрос на каждую букву
+let searchTimer = null;
 
 watch(filters, () => {
-    loadProducts();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadProducts, 300);
 }, { deep: true });
 
 onMounted(async () => {
     await Promise.all([
         loadCategories(),
-        loadBrands()
+        loadBrands(),
+        loadProducts()
     ]);
-
-    await loadProducts();
 });
 </script>
 
@@ -398,16 +420,6 @@ onMounted(async () => {
 .filter-block h4 {
 
     margin-bottom: 12px;
-
-}
-
-.filter-block label {
-
-    display: block;
-
-    margin-bottom: 10px;
-
-    cursor: pointer;
 
 }
 

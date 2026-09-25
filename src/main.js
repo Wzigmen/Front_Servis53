@@ -4,28 +4,12 @@ import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
 
-import { useAuthStore } from "@/stores/auth";
-
 import "./styles/main.css";
 
 const app = createApp(App);
-const pinia = createPinia();
 
-app.use(pinia);
+// pinia подключается до router: guard роутера использует store авторизации
+app.use(createPinia());
 app.use(router);
 
-async function bootstrap() {
-    const auth = useAuthStore();
-
-    if (auth.token) {
-        try {
-            await auth.fetchUser();
-        }
-        catch {
-            auth.logout();
-        }
-    }
-    app.mount("#app");
-}
-
-bootstrap();
+app.mount("#app");

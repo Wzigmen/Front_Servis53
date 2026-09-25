@@ -6,7 +6,7 @@
 
             <div class="avatar">
 
-                <img v-if="avatarUrl" :src="avatarUrl" />
+                <img v-if="avatar" :src="avatar" />
 
                 <span v-else>
 
@@ -18,79 +18,65 @@
 
                     📷
 
-                    <input hidden type="file" accept="image/*" @change="uploadAvatar" />
+                    <input hidden type="file" accept="image/*" @change="changeAvatar" />
 
                 </label>
 
             </div>
 
-            <div class="info-grid">
+            <div class="profile-name">
+
+                <h1>{{ auth.user?.fullName || auth.user?.login }}</h1>
+
+                <div class="role">{{ auth.user?.role }}</div>
+
+            </div>
+
+            <!-- Просмотр -->
+            <div v-if="!editing" class="info-grid">
 
                 <div class="info-card">
-
-                    <span class="title">
-
-                        Логин
-
-                    </span>
-
-                    <span class="value">
-
-                        {{ auth.user?.login }}
-
-                    </span>
-
+                    <span class="title">Логин</span>
+                    <span class="value">{{ auth.user?.login }}</span>
                 </div>
 
                 <div class="info-card">
-
-                    <span class="title">
-
-                        Email
-
-                    </span>
-
-                    <span class="value">
-
-                        {{ auth.user?.email }}
-
-                    </span>
-
+                    <span class="title">Email</span>
+                    <span class="value">{{ auth.user?.email || "—" }}</span>
                 </div>
 
                 <div class="info-card">
-
-                    <span class="title">
-
-                        ID пользователя
-
-                    </span>
-
-                    <span class="value">
-
-                        #{{ auth.user?.id }}
-
-                    </span>
-
+                    <span class="title">Телефон</span>
+                    <span class="value">{{ auth.user?.phone || "—" }}</span>
                 </div>
 
                 <div class="info-card">
-
-                    <span class="title">
-
-                        Роль
-
-                    </span>
-
-                    <span class="value">
-
-                        {{ auth.user?.role }}
-
-                    </span>
-
+                    <span class="title">ID пользователя</span>
+                    <span class="value">#{{ auth.user?.id }}</span>
                 </div>
 
             </div>
+
+            <!-- Редактирование -->
+            <form v-else class="info-grid" @submit.prevent="saveProfile">
+
+                <label class="info-card">
+                    <span class="title">Имя</span>
+                    <input v-model="profileForm.fullName" class="edit-input" maxlength="100">
+                </label>
+
+                <label class="info-card">
+                    <span class="title">Email</span>
+                    <input v-model="profileForm.email" class="edit-input" type="email" maxlength="100">
+                </label>
+
+                <label class="info-card">
+                    <span class="title">Телефон</span>
+                    <input v-model="profileForm.phone" class="edit-input" type="tel" maxlength="20">
+                </label>
+
+            </form>
+
             <div class="profile-section">
 
                 <button class="orders-toggle" @click="showOrders = !showOrders">
@@ -107,7 +93,13 @@
 
                 <div v-if="showOrders" class="orders-list">
 
-                    <div v-if="orders.length" v-for="order in orders" :key="order.id" class="order-card">
+                    <p v-if="orders.length === 0" class="empty-orders">
+
+                        У вас пока нет заказов
+
+                    </p>
+
+                    <div v-for="order in orders" :key="order.id" class="order-card">
 
                         <div class="order-header" @click="toggleOrder(order.id)">
 
@@ -137,7 +129,7 @@
 
                                 <strong>
 
-                                    {{ order.totalPrice.toLocaleString() }} ₽
+                                    {{ formatPrice(order.totalPrice) }} ₽
 
                                 </strong>
 
@@ -163,7 +155,7 @@
 
                                 <span>
 
-                                    {{ item.quantity }} × {{ item.price.toLocaleString() }} ₽
+                                    {{ item.quantity }} × {{ formatPrice(item.price) }} ₽
 
                                 </span>
 
@@ -173,28 +165,35 @@
 
                     </div>
 
-                    <p v-else class="empty-orders">
-
-                        У вас пока нет заказов
-
-                    </p>
-
                 </div>
 
             </div>
+
             <div class="buttons">
 
-                <button class="edit">
+                <template v-if="editing">
 
-                    ✏ Редактировать профиль
+                    <button class="edit" :disabled="saving" @click="saveProfile">
+                        💾 Сохранить
+                    </button>
 
-                </button>
+                    <button class="logout" @click="editing = false">
+                        ✖ Отмена
+                    </button>
 
-                <button class="logout" @click="logout">
+                </template>
 
-                    🚪 Выйти
+                <template v-else>
 
-                </button>
+                    <button class="edit" @click="startEdit">
+                        ✏ Редактировать профиль
+                    </button>
+
+                    <button class="logout" @click="logout">
+                        🚪 Выйти
+                    </button>
+
+                </template>
 
             </div>
 
@@ -205,45 +204,37 @@
 </template>
 
 <script setup>
-import api from "@/api/api";
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { getMyOrders } from "@/api/orders";
+import { uploadAvatar, updateProfile } from "@/api/users";
+import { avatarUrl, errorMessage } from "@/api/api";
 
 const auth = useAuthStore();
 const router = useRouter();
 const orders = ref([]);
 const showOrders = ref(false);
 const openedOrder = ref(null);
+const editing = ref(false);
+const saving = ref(false);
+const profileForm = ref({ fullName: "", email: "", phone: "" });
 
 function toggleOrder(id) {
 
-    if (openedOrder.value === id)
-
-        openedOrder.value = null;
-
-    else
-
-        openedOrder.value = id;
+    openedOrder.value = openedOrder.value === id ? null : id;
 
 }
+
 const firstLetter = computed(() => {
 
-    if (!auth.user?.fullName)
-        return "?";
+    const name = auth.user?.fullName || auth.user?.login;
 
-    return auth.user.fullName[0].toUpperCase();
-
-});
-
-const avatarUrl = computed(() => {
-
-    if (!auth.user?.avatar)
-        return null;
-
-    return `http://localhost:5263/images/avatars/${auth.user.avatar}`;
+    return name ? name[0].toUpperCase() : "?";
 
 });
+
+const avatar = computed(() => avatarUrl(auth.user?.avatar));
 
 function logout() {
 
@@ -253,7 +244,50 @@ function logout() {
 
 }
 
-async function uploadAvatar(e) {
+function startEdit() {
+
+    profileForm.value = {
+        fullName: auth.user?.fullName ?? "",
+        email: auth.user?.email ?? "",
+        phone: auth.user?.phone ?? ""
+    };
+
+    editing.value = true;
+}
+
+async function saveProfile() {
+
+    saving.value = true;
+
+    try {
+
+        const { data } = await updateProfile({
+            fullName: profileForm.value.fullName,
+            // пустой email не проходит серверную валидацию — отправляем null
+            email: profileForm.value.email || null,
+            phone: profileForm.value.phone
+        });
+
+        auth.user = data;
+
+        editing.value = false;
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+        alert(errorMessage(e, "Не удалось сохранить профиль"));
+
+    }
+    finally {
+
+        saving.value = false;
+
+    }
+}
+
+async function changeAvatar(e) {
 
     console.log("Файл выбран");
     const file = e.target.files[0];
@@ -261,30 +295,42 @@ async function uploadAvatar(e) {
     if (!file)
         return;
 
-    const form = new FormData();
+    try {
 
-    form.append("file", file);
+        await uploadAvatar(file);
 
-    await api.post("/users/avatar", form, {
-        headers: {
-            "Content-Type": "multipart/form-data"
-        }
-    });
+        await auth.fetchUser();
+        console.log(auth.user);
 
-    await auth.fetchUser();
-    console.log(auth.user);
+    }
+    catch (err) {
+
+        console.error(err);
+
+        alert(errorMessage(err, "Не удалось загрузить аватар"));
+
+    }
+    finally {
+
+        e.target.value = "";
+
+    }
 }
 
 async function loadOrders() {
 
-    if (!auth.user)
-        return;
+    try {
 
-    const { data } = await api.get(
-        `/orders/user/${auth.user.id}/details`
-    );
+        const { data } = await getMyOrders();
 
-    orders.value = data;
+        orders.value = data;
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+    }
 
 }
 
@@ -293,11 +339,14 @@ function formatDate(date) {
     return new Date(date).toLocaleDateString("ru-RU");
 
 }
-onMounted(() => {
 
-    loadOrders();
+function formatPrice(price) {
 
-});
+    return Number(price).toLocaleString("ru-RU");
+
+}
+
+onMounted(loadOrders);
 </script>
 
 <style scoped>
@@ -306,22 +355,6 @@ onMounted(() => {
     padding: 70px 0;
 
     min-height: 100vh;
-
-}
-
-.profile-card {
-
-    background: white;
-
-    border-radius: 35px;
-
-    padding: 60px;
-
-    text-align: center;
-
-    box-shadow: 0 20px 60px rgba(0, 0, 0, .08);
-
-    animation: show .7s;
 
 }
 
@@ -561,25 +594,7 @@ h1 {
 
 }
 
-.orders {
-
-    margin-top: 50px;
-
-}
-
-.orders h2 {
-
-    margin-bottom: 20px;
-
-}
-
 .order-card {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
 
     padding: 20px;
 
@@ -704,6 +719,42 @@ h1 {
     text-align: center;
 
     color: #64748b;
+
+}
+
+.profile-name {
+
+    margin-top: 25px;
+
+    text-align: center;
+
+    animation: show .7s;
+
+}
+
+.edit-input {
+
+    padding: 12px 14px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+
+}
+
+.edit-input:focus {
+
+    border-color: #2563eb;
+
+}
+
+.edit:disabled {
+
+    opacity: .6;
+
+    cursor: wait;
 
 }
 

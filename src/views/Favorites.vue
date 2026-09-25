@@ -6,7 +6,7 @@
 
             <h1>❤️ Избранное</h1>
 
-            <div v-if="favorites.length === 0" class="empty">
+            <div v-if="favorites.products.length === 0" class="empty">
 
                 <div class="empty-icon">
                     ❤️
@@ -26,14 +26,19 @@
 
             </div>
 
-            <div class="products-grid">
+            <template v-else>
 
-                <ProductCard v-for="product in visibleFavorites" :key="product.id" :product="product" />
+                <div class="products-grid">
 
-            </div>
-            <button v-if="visibleCount < favorites.length" class="load-more" @click="loadMore">
-                Показать ещё
-            </button>
+                    <ProductCard v-for="product in visibleFavorites" :key="product.id" :product="product" />
+
+                </div>
+
+                <button v-if="visibleCount < favorites.products.length" class="load-more" @click="loadMore">
+                    Показать ещё
+                </button>
+
+            </template>
 
         </div>
 
@@ -42,57 +47,45 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from "vue";
 import ProductCard from "@/components/shop/ProductCard.vue";
-import { ref, computed, watch } from "vue";
-import { useAuthStore } from "@/stores/auth";
-import api from "@/api/api";
+import { useFavoritesStore } from "@/stores/favorites";
 
-const auth = useAuthStore();
-
-const favorites = ref([]);
+const favorites = useFavoritesStore();
 
 const visibleCount = ref(12);
 
 const visibleFavorites = computed(() =>
-    favorites.value.slice(0, visibleCount.value)
+    favorites.products.slice(0, visibleCount.value)
 );
 
 function loadMore() {
     visibleCount.value += 12;
 }
-async function loadFavorites() {
 
-    if (!auth.user)
-        return;
+onMounted(async () => {
 
-    const { data } = await api.get(`/favorites/${auth.user.id}`);
+    try {
+        await favorites.load();
+    }
+    catch (e) {
+        console.error(e);
+    }
 
-    favorites.value = data;
-}
-
-async function removeFavorite(productId) {
-
-    await api.delete(
-        `/favorites/${auth.user.id}/${productId}`
-    );
-
-    await loadFavorites();
-
-    window.dispatchEvent(new Event("favorites-updated"));
-
-}
-watch(
-    () => auth.user,
-    (user) => {
-        if (user) {
-            loadFavorites();
-        }
-    },
-    { immediate: true }
-);
+});
 </script>
 
 <style scoped>
+.favorites-page {
+
+    max-width: 1100px;
+
+    margin: auto;
+
+    padding: 40px;
+
+}
+
 .load-more {
     margin: 50px auto 0;
     display: block;
@@ -174,91 +167,5 @@ watch(
 .shop-btn:hover {
     background: #0b5ed7;
     transform: translateY(-2px);
-}
-
-.favorites-page {
-
-    max-width: 1100px;
-
-    margin: auto;
-
-    padding: 40px;
-
-}
-
-.favorite-card {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 30px;
-
-    background: white;
-
-    border-radius: 18px;
-
-    padding: 20px;
-
-    margin-bottom: 20px;
-
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
-
-}
-
-.favorite-card img {
-
-    width: 120px;
-
-    height: 120px;
-
-    object-fit: contain;
-
-}
-
-.info {
-
-    flex: 1;
-
-}
-
-.buttons {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 10px;
-
-}
-
-.buttons button {
-
-    padding: 12px 18px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    cursor: pointer;
-
-}
-
-.delete {
-
-    background: #ff4b4b;
-
-    color: white;
-
-}
-
-.empty {
-
-    text-align: center;
-
-    padding: 80px;
-
-    font-size: 22px;
-
 }
 </style>

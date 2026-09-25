@@ -5,7 +5,7 @@
 
             <div class="breadcrumbs">
 
-                Магазин /
+                <RouterLink to="/shop">Магазин</RouterLink> /
                 {{ product.category }} /
                 {{ product.name }}
 
@@ -17,7 +17,9 @@
 
                 <div class="gallery">
 
-                    <img class="main-image" :src="currentImage">
+                    <img v-if="currentImage" class="main-image" :src="currentImage" :alt="product.name">
+
+                    <div v-else class="main-image placeholder">📦</div>
 
                     <div class="thumbs">
 
@@ -62,17 +64,17 @@
                         </b>
 
                     </div>
-                    <div class="stock">
+                    <div class="stock" :class="{ out: product.quantity <= 0 }">
 
-                        ✔ В наличии
+                        {{ product.quantity > 0 ? `✔ В наличии: ${product.quantity} шт.` : "Нет в наличии" }}
 
                     </div>
 
                     <div class="buttons">
 
-                        <button to="/cart" class="buy" @click="addToCart">
+                        <button class="buy" :disabled="product.quantity <= 0" @click="addToCart">
 
-                            🛒 Купить сейчас
+                            🛒 В корзину
 
                         </button>
 
@@ -86,7 +88,7 @@
 
                         <div>🚚 Доставка завтра</div>
 
-                        <div>🛡 Гарантия {{ product.warrantyMonths ?? 12 }} мес.</div>
+                        <div v-if="product.warrantyMonths">🛡 Гарантия {{ product.warrantyMonths }} мес.</div>
 
                         <div>💳 Оплата при получении</div>
 
@@ -98,7 +100,7 @@
 
             <!-- Описание -->
 
-            <div class="card">
+            <div class="card" v-if="product.description">
 
                 <h2>
 
@@ -116,7 +118,7 @@
 
             <!-- Характеристики -->
 
-            <div class="card">
+            <div class="card" v-if="specs.length">
 
                 <h2>
 
@@ -153,50 +155,101 @@
         </div>
 
     </div>
+
+    <div v-else-if="notFound" class="container not-found">
+        Товар не найден. <RouterLink to="/shop">Вернуться в магазин</RouterLink>
+    </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import api from "@/api/api";
+import { useCartStore } from "@/stores/cart";
+import { useFavoritesStore } from "@/stores/favorites";
+import { getProduct } from "@/api/products";
+import { productImageUrl, errorMessage } from "@/api/api";
 
 const auth = useAuthStore();
-const isFavorite = ref(false);
-
+const cart = useCartStore();
+const favorites = useFavoritesStore();
 const route = useRoute();
 
 const product = ref(null);
-
+const notFound = ref(false);
 const currentImage = ref("");
+
+const isFavorite = computed(() => product.value && favorites.has(product.value.id));
+
+// Подписи характеристик (ключи приходят из PhoneSpec / LaptopSpec / PcSpec / HeadphoneSpec)
+const specLabels = {
+    screenSize: "Диагональ экрана",
+    resolution: "Разрешение",
+    processor: "Процессор",
+    cpu: "Процессор",
+    gpu: "Видеокарта",
+    ram: "Оперативная память",
+    storage: "Накопитель",
+    rearCamera: "Основная камера",
+    frontCamera: "Фронтальная камера",
+    battery: "Аккумулятор",
+    batteryLife: "Время работы",
+    operatingSystem: "Операционная система",
+    simType: "SIM-карта",
+    network: "Сеть",
+    refreshRate: "Частота обновления",
+    weight: "Вес",
+    motherboard: "Материнская плата",
+    powerSupply: "Блок питания",
+    caseName: "Корпус",
+    cooling: "Охлаждение",
+    headphoneType: "Тип наушников",
+    wireless: "Беспроводные",
+    bluetoothVersion: "Версия Bluetooth",
+    noiseCanceling: "Шумоподавление",
+    microphone: "Микрофон"
+};
 
 async function load() {
 
-    const { data } = await api.get(`/products/${route.params.id}`);
+    if (!route.params.id)
+        return;
 
-    product.value = data;
+    product.value = null;
+    notFound.value = false;
+    currentImage.value = "";
 
-    if (data.images.length)
-        currentImage.value = image(data.images[0]);
+    try {
 
-    if (auth.user) {
+        const { data } = await getProduct(route.params.id);
 
-        const { data } = await api.get(`/favorites/${auth.user.id}`);
+        product.value = data;
 
-        isFavorite.value = data.some(x => x.id === product.value.id);
+        if (data.images.length)
+            currentImage.value = image(data.images[0]);
+
+    }
+    catch (e) {
+
+        console.error(e);
+
+        notFound.value = true;
 
     }
 
 }
+
 async function addToCart() {
+
+    if (!auth.isAuthenticated) {
+        alert("Необходимо войти");
+        return;
+    }
 
     try {
 
-        await api.post("/cart/add", {
-            productId: product.value.id,
-            quantity: 1
-        });
-        window.dispatchEvent(new Event("cart-updated"));
+        await cart.add(product.value.id);
+
         alert("Товар добавлен в корзину");
 
     }
@@ -208,12 +261,15 @@ async function addToCart() {
 
         console.log(e.response?.data);
 
+        alert(errorMessage(e, "Не удалось добавить товар в корзину"));
+
     }
 
 }
+
 async function toggleFavorite() {
 
-    if (!auth.user) {
+    if (!auth.isAuthenticated) {
 
         alert("Необходимо войти");
         return;
@@ -222,23 +278,7 @@ async function toggleFavorite() {
 
     try {
 
-        if (isFavorite.value) {
-
-            await api.delete(`/favorites/${auth.user.id}/${product.value.id}`);
-            isFavorite.value = false;
-
-        } else {
-
-            await api.post("/favorites", {
-                userId: auth.user.id,
-                productId: product.value.id
-            });
-
-            isFavorite.value = true;
-
-        }
-
-        window.dispatchEvent(new Event("favorites-updated"));
+        await favorites.toggle(product.value.id);
 
     }
     catch (e) {
@@ -248,9 +288,10 @@ async function toggleFavorite() {
     }
 
 }
+
 function image(name) {
 
-    return `http://localhost:5263/images/products/${product.value.id}/${name}`;
+    return productImageUrl(product.value.id, name);
 
 }
 
@@ -260,10 +301,17 @@ function formatPrice(price) {
 
 }
 
+function formatSpecValue(value) {
+
+    if (value === true) return "Да";
+    if (value === false) return "Нет";
+
+    return value;
+}
+
 const specs = computed(() => {
 
     if (!product.value)
-
         return [];
 
     const p = product.value.phone ??
@@ -272,30 +320,24 @@ const specs = computed(() => {
         product.value.headphones;
 
     if (!p)
-
         return [];
 
     return Object.entries(p)
-
-        .filter(x =>
-
-            x[0] != "id" &&
-            x[0] != "productId" &&
-            x[0] != "product"
-
+        .filter(([key, value]) =>
+            key !== "id" &&
+            key !== "productId" &&
+            value !== null &&
+            value !== ""
         )
-
-        .map(x => ({
-
-            name: x[0],
-
-            value: x[1]
-
+        .map(([key, value]) => ({
+            name: specLabels[key] ?? key,
+            value: formatSpecValue(value)
         }));
 
 });
 
-onMounted(load);
+// перезагрузка при переходе с одного товара на другой
+watch(() => route.params.id, load, { immediate: true });
 </script>
 
 <style scoped>
@@ -601,19 +643,65 @@ table {
 
 }
 
-.card {
+td {
 
-    background: white;
+    padding: 10px 0;
 
-    border-radius: 24px;
+    border-bottom: 1px solid #f1f5f9;
 
-    padding: 35px;
+}
 
-    margin-top: 40px;
+.stock.out {
 
-    box-shadow:
+    background: #f1f5f9;
 
-        0 10px 35px rgba(0, 0, 0, .05);
+    color: #64748b;
+
+}
+
+.buy:disabled {
+
+    background: #cbd5e1;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+
+}
+
+.placeholder {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 120px;
+
+}
+
+.breadcrumbs a {
+
+    color: #2563eb;
+
+}
+
+.not-found {
+
+    padding: 80px 0;
+
+    text-align: center;
+
+    font-size: 20px;
+
+}
+
+.not-found a {
+
+    color: #2563eb;
 
 }
 

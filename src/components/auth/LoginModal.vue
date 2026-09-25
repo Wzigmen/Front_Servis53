@@ -74,6 +74,7 @@
 <script setup>
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
+import { errorMessage } from "@/api/api";
 
 const emit = defineEmits(["close"]);
 const auth = useAuthStore();
@@ -95,11 +96,8 @@ async function loginUser() {
     try {
 
         await auth.login({
-
             login: login.value,
-
             password: password.value
-
         });
 
         emit("close");
@@ -122,8 +120,6 @@ async function loginUser() {
 
 async function registerUser() {
 
-    loading.value = true;
-
     error.value = "";
 
     // Проверка телефона
@@ -131,49 +127,36 @@ async function registerUser() {
 
         error.value = "Введите корректный номер телефона";
 
-        loading.value = false;
-
         return;
 
     }
 
+    loading.value = true;
+
     try {
 
         await auth.register({
-
             login: login.value,
-
             password: password.value,
-
-            email: email.value,
-
+            // пустой email не проходит серверную валидацию — отправляем null
+            email: email.value || null,
             phone: phone.value,
-
             fullName: fullName.value
-
         });
 
+        // сразу входим в созданный аккаунт
         await auth.login({
-
             login: login.value,
-
             password: password.value
-
         });
 
         emit("close");
 
-        isRegister.value = false;
-
-        error.value = "Аккаунт успешно создан! Теперь войдите.";
-
-        password.value = "";
-
     }
 
-    catch {
+    catch (e) {
 
-        error.value = "Не удалось зарегистрироваться";
+        error.value = errorMessage(e, "Не удалось зарегистрироваться");
 
     }
 
@@ -293,17 +276,6 @@ input:focus {
 
 }
 
-.remember {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    margin-bottom: 25px;
-
-}
 
 button {
 

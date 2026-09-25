@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-free": "^7.3.0",
     "axios": "^1.18.1",
     "lucide-vue-next": "^1.0.0",
     "pinia": "^3.0.4",

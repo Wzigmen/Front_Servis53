@@ -1,7 +1,7 @@
 import api from "./api";
 
-export function getProducts() {
-    return api.get("/products");
+export function getProducts(params) {
+    return api.get("/products", { params });
 }
 
 export function getProduct(id) {
@@ -18,4 +18,25 @@ export function updateProduct(id, product) {
 
 export function deleteProduct(id) {
     return api.delete(`/products/${id}`);
+}
+
+export function uploadProductImages(id, files) {
+
+    const form = new FormData();
+
+    files.forEach(file => form.append("files", file));
+
+    return api.post(`/products/${id}/images`, form);
+}
+
+export function savePhoneSpec(id, spec) {
+    return api.post(`/products/${id}/phone`, spec);
+}
+
+export function getCategories() {
+    return api.get("/categories");
+}
+
+export function getBrands() {
+    return api.get("/brands");
 }

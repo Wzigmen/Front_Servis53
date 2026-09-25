@@ -10,10 +10,10 @@
 
       <div class="footer-block">
         <h4>Навигация</h4>
-        <a href="#">Главная</a>
-        <a href="#">Услуги</a>
-        <a href="#">Магазин</a>
-        <a href="#">Контакты</a>
+        <RouterLink to="/">Главная</RouterLink>
+        <RouterLink to="/services">Услуги</RouterLink>
+        <RouterLink to="/shop">Магазин</RouterLink>
+        <RouterLink to="/contacts">Контакты</RouterLink>
       </div>
 
       <div class="footer-block">

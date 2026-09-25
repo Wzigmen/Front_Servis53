@@ -1,131 +1,101 @@
 <template>
-    <div class="cart">
+    <div class="cart container">
 
         <h1>🛒 Корзина</h1>
 
         <div v-if="cart.items.length === 0" class="empty">
 
-            Корзина пуста
+            Корзина пуста.
+            <RouterLink to="/shop">Перейти в магазин</RouterLink>
 
         </div>
 
-        <div v-else>
+        <div v-else class="cart-layout">
 
-            <div class="cart-layout">
+            <div class="cart-list">
 
-                <div class="cart-list">
+                <div class="cart-item" v-for="item in cart.items" :key="item.id">
 
-                    <div class="cart-item" v-for="item in cart.items" :key="item.id">
+                    <img v-if="item.image" :src="productImageUrl(item.productId, item.image)" class="product-image">
+                    <div v-else class="product-image placeholder">📦</div>
 
-                        <img :src="imageUrl(item)" class="product-image">
+                    <div class="product-info">
 
-                        <div class="product-info">
-
-                            <h3>
-
-                                {{ item.name }}
-
-                            </h3>
-
-                            <span>
-
-                                В наличии
-
-                            </span>
-
-                        </div>
-
-                        <div class="product-price">
-
-                            {{ item.price.toLocaleString() }} ₽
-
-                        </div>
-
-                        <div class="quantity">
-
-                            <button @click="changeQuantity(item, -1)">
-
-                                −
-
-                            </button>
-
-                            <span>
-
-                                {{ item.quantity }}
-
-                            </span>
-
-                            <button @click="changeQuantity(item, 1)">
-
-                                +
-
-                            </button>
-
-                        </div>
-
-                        <div class="sum">
-
-                            {{ (item.price * item.quantity).toLocaleString() }} ₽
-
-                        </div>
-
-                        <button class="delete" @click="remove(item)">
-
-                            🗑
-
-                        </button>
+                        <RouterLink :to="`/product/${item.productId}`">
+                            <h3>{{ item.name }}</h3>
+                        </RouterLink>
 
                     </div>
+
+                    <div class="product-price">
+
+                        {{ formatPrice(item.price) }} ₽
+
+                    </div>
+
+                    <div class="quantity">
+
+                        <button :disabled="busy" @click="changeQuantity(item, -1)">−</button>
+
+                        <span>{{ item.quantity }}</span>
+
+                        <button :disabled="busy" @click="changeQuantity(item, 1)">+</button>
+
+                    </div>
+
+                    <div class="sum">
+
+                        {{ formatPrice(item.price * item.quantity) }} ₽
+
+                    </div>
+
+                    <button class="delete" :disabled="busy" @click="remove(item)">🗑</button>
 
                 </div>
 
-                <div class="summary">
+            </div>
 
-                    <h2>
+            <div class="summary">
 
-                        Ваш заказ
+                <h2>Ваш заказ</h2>
 
-                    </h2>
+                <div class="row">
 
-                    <div class="row">
+                    <span>Товаров</span>
 
-                        <span>Товаров</span>
-
-                        <b>{{ cart.items.length }}</b>
-
-                    </div>
-
-                    <div class="row">
-
-                        <span>Стоимость</span>
-
-                        <b>{{ cart.total.toLocaleString() }} ₽</b>
-
-                    </div>
-
-                    <div class="row">
-
-                        <span>Доставка</span>
-
-                        <b>Бесплатно</b>
-
-                    </div>
-
-                    <hr>
-
-                    <div class="total">
-
-                        {{ cart.total.toLocaleString() }} ₽
-
-                    </div>
-
-                    <button class="checkout" @click="checkout">
-
-                        Оформить заказ
-
-                    </button>
+                    <b>{{ cart.count }}</b>
 
                 </div>
+
+                <div class="row">
+
+                    <span>Стоимость</span>
+
+                    <b>{{ formatPrice(cart.total) }} ₽</b>
+
+                </div>
+
+                <div class="row">
+
+                    <span>Доставка</span>
+
+                    <b>Бесплатно</b>
+
+                </div>
+
+                <hr>
+
+                <div class="total">
+
+                    {{ formatPrice(cart.total) }} ₽
+
+                </div>
+
+                <button class="checkout" :disabled="busy" @click="checkout">
+
+                    Оформить заказ
+
+                </button>
 
             </div>
 
@@ -136,86 +106,57 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import api from "@/api/api";
-import { useAuthStore } from "@/stores/auth";
+import { useCartStore } from "@/stores/cart";
+import { productImageUrl, errorMessage } from "@/api/api";
 
-const auth = useAuthStore();
-const cart = ref({
+const cart = useCartStore();
+const busy = ref(false);
 
-    items: [],
+// Все действия с корзиной: блокируем кнопки и показываем ошибку сервера
+async function run(action, fallback) {
 
-    total: 0
-
-});
-async function checkout() {
+    busy.value = true;
 
     try {
-
-        await api.post("/orders/checkout", {
-
-            userId: auth.user.id
-
-        });
-
-        alert("Заказ успешно оформлен!");
-
-        location.reload();
-
+        await action();
     }
     catch (e) {
 
         console.error(e);
 
-        alert("Ошибка оформления заказа");
+        alert(errorMessage(e, fallback));
 
     }
-
-}
-async function remove(item) {
-
-    await api.delete(
-
-        `/cart/${item.productId}`
-
-    );
-    window.dispatchEvent(new Event("cart-updated"));
-    loadCart();
-
+    finally {
+        busy.value = false;
+    }
 }
 
-async function changeQuantity(item, delta) {
+function checkout() {
 
-    const quantity = item.quantity + delta;
+    return run(async () => {
 
-    await api.put("/cart/update", {
-        productId: item.productId,
-        quantity
-    });
-    window.dispatchEvent(new Event("cart-updated"));
-    loadCart();
+        const order = await cart.checkout();
+
+        alert(`Заказ №${order.id} успешно оформлен!`);
+
+    }, "Ошибка оформления заказа");
 
 }
 
-function imageUrl(item) {
-
-    if (!item.image)
-
-        return "";
-
-    return `http://localhost:5263/images/products/${item.productId}/${item.image}`;
-
+function remove(item) {
+    return run(() => cart.remove(item.productId), "Не удалось удалить товар");
 }
 
-async function loadCart() {
-
-    const { data } = await api.get("/cart");
-
-    cart.value = data;
-
+function changeQuantity(item, delta) {
+    return run(() => cart.setQuantity(item.productId, item.quantity + delta), "Не удалось изменить количество");
 }
 
-onMounted(loadCart);
+function formatPrice(price) {
+    return Number(price).toLocaleString("ru-RU");
+}
 
+onMounted(() => run(() => cart.load(), "Не удалось загрузить корзину"));
 </script>
 
 <style scoped>
@@ -406,6 +347,59 @@ onMounted(loadCart);
     font-size: 16px;
 
     cursor: pointer;
+
+}
+
+.cart {
+
+    padding: 40px 0;
+
+}
+
+.cart h1 {
+
+    margin-bottom: 30px;
+
+}
+
+.empty {
+
+    padding: 60px;
+
+    text-align: center;
+
+    font-size: 20px;
+
+    background: white;
+
+    border-radius: 10px;
+
+}
+
+.empty a,
+.product-info a {
+
+    color: #2563eb;
+
+}
+
+.placeholder {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-size: 48px;
+
+}
+
+.cart button:disabled {
+
+    opacity: .5;
+
+    cursor: wait;
 
 }
 </style>

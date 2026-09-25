@@ -7,11 +7,11 @@
                 <span class="logo-icon">⚡</span>
                 <span class="logo-text">Servis53</span>
             </RouterLink>
-            <RouterLink v-if="auth.user?.role === 'Admin'" to="/admin" class="admin-btn">
 
+            <RouterLink v-if="auth.isAdmin" to="/admin" class="admin-btn">
                 Админ
-
             </RouterLink>
+
             <!-- Навигация -->
             <nav class="nav">
                 <RouterLink to="/">Главная</RouterLink>
@@ -23,127 +23,93 @@
             <!-- Правая часть -->
             <div class="actions">
 
-                <RouterLink to="/favorites" class="icon-btn" >
+                <RouterLink to="/favorites" class="icon-btn badge-btn">
 
                     <Heart :size="20" />
 
-                    <!-- <span v-if="favoritesCount > 0" class="cart-count">
-                        {{ favoritesCount }}
-                    </span> -->
+                    <span v-if="favorites.count > 0" class="cart-count">
+                        {{ favorites.count }}
+                    </span>
 
                 </RouterLink>
 
-                <RouterLink to="/cart" class="icon-btn cart-btn">
+                <RouterLink to="/cart" class="icon-btn badge-btn">
 
                     <ShoppingCart :size="20" />
 
-                    <span v-if="cartCount > 0" class="cart-count">
-
-                        {{ cartCount }}
-
+                    <span v-if="cart.count > 0" class="cart-count">
+                        {{ cart.count }}
                     </span>
 
                 </RouterLink>
 
                 <button v-if="!auth.isAuthenticated" class="login-btn" @click="showLogin = true">
-
                     Войти
-
                 </button>
 
                 <RouterLink v-else to="/profile" class="profile-btn">
                     <User :size="18" />
-                    {{ auth.user?.fullName }}
+                    {{ auth.user?.fullName || auth.user?.login }}
                 </RouterLink>
 
             </div>
         </div>
     </header>
+
     <LoginModal v-if="showLogin" @close="showLogin = false" />
 </template>
 
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
+import { Heart, ShoppingCart, User } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth";
-import { Search, Heart, ShoppingCart, User } from "lucide-vue-next";
+import { useCartStore } from "@/stores/cart";
+import { useFavoritesStore } from "@/stores/favorites";
 import LoginModal from "@/components/auth/LoginModal.vue";
-import api from "@/api/api";
 
 const auth = useAuthStore();
-const favorites = ref([]);
-const favoritesCount = computed(() => favorites.value.length);
-const cart = ref({
-    items: []
-});
+const cart = useCartStore();
+const favorites = useFavoritesStore();
+
 const showLogin = ref(false);
 const isScrolled = ref(false);
 
-const handleScroll = () => {
+function handleScroll() {
     isScrolled.value = window.scrollY > 40;
-};
-
-const cartCount = computed(() => {
-
-    return cart.value.items.reduce(
-
-        (sum, item) => sum + item.quantity,
-
-        0
-
-    );
-
-});
-
-async function loadCart() {
-
-    if (!auth.isAuthenticated)
-        return;
-
-    try {
-
-        const { data } = await api.get("/cart");
-
-        cart.value = data;
-
-    }
-    catch (e) {
-
-        console.error(e);
-
-    }
-
 }
-async function loadFavorites() {
 
-    if (!auth.user)
-        return;
+// При входе загружаем корзину и избранное, при выходе — очищаем
+watch(
+    () => auth.user?.id,
+    async (userId) => {
 
-    const { data } = await api.get(`/favorites/${auth.user.id}`);
+        if (!userId) {
+            cart.reset();
+            favorites.reset();
+            return;
+        }
 
-    favorites.value = data;
+        try {
+            await Promise.all([cart.load(), favorites.load()]);
+        }
+        catch (e) {
+            console.error(e);
+        }
+    },
+    { immediate: true }
+);
 
-}
-function cartUpdated() {
-
-    loadCart();
-
-}
-onMounted(async () => {
-
+onMounted(() => {
     window.addEventListener("scroll", handleScroll);
-
-    loadCart();
-    await loadFavorites();
-
-    window.addEventListener("cart-updated", cartUpdated);
-
 });
 
-
+onUnmounted(() => {
+    window.removeEventListener("scroll", handleScroll);
+});
 </script>
 
 <style scoped>
-.cart-btn {
+.badge-btn {
 
     position: relative;
 

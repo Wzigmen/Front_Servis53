@@ -16,32 +16,9 @@
 
             <nav>
 
-                <button :class="{ active: currentPage === 'dashboard' }" @click="currentPage = 'dashboard'">
-                    📊 Панель
-                </button>
-
-                <button :class="{ active: currentPage === 'products' }" @click="currentPage = 'products'">
-                    📦 Товары
-                </button>
-
-                <button :class="{ active: currentPage === 'users' }" @click="currentPage = 'users'">
-                    👥 Пользователи
-                </button>
-
-                <button :class="{ active: currentPage === 'orders' }" @click="currentPage = 'orders'">
-                    🛒 Заказы
-                </button>
-
-                <button :class="{ active: currentPage === 'repairs' }" @click="currentPage = 'repairs'">
-                    🔧 Ремонт
-                </button>
-
-                <button :class="{ active: currentPage === 'reviews' }" @click="currentPage = 'reviews'">
-                    ⭐ Отзывы
-                </button>
-
-                <button :class="{ active: currentPage === 'settings' }" @click="currentPage = 'settings'">
-                    ⚙ Настройки
+                <button v-for="tab in tabs" :key="tab.id" :class="{ active: currentPage === tab.id }"
+                    @click="currentPage = tab.id">
+                    {{ tab.title }}
                 </button>
 
             </nav>
@@ -57,56 +34,22 @@
             <template v-if="currentPage === 'dashboard'">
 
                 <h1>
-
                     Добро пожаловать 👋
-
                 </h1>
 
                 <p class="subtitle">
-
                     Панель управления Servis53
-
                 </p>
 
                 <div class="cards">
 
-                    <div class="card">
+                    <div class="card" v-for="stat in stats" :key="stat.title">
 
-                        <span>📦</span>
+                        <span>{{ stat.icon }}</span>
 
-                        <h2>20</h2>
+                        <h2>{{ stat.value }}</h2>
 
-                        <p>Товаров</p>
-
-                    </div>
-
-                    <div class="card">
-
-                        <span>👥</span>
-
-                        <h2>12</h2>
-
-                        <p>Пользователей</p>
-
-                    </div>
-
-                    <div class="card">
-
-                        <span>🛒</span>
-
-                        <h2>5</h2>
-
-                        <p>Заказов</p>
-
-                    </div>
-
-                    <div class="card">
-
-                        <span>🔧</span>
-
-                        <h2>3</h2>
-
-                        <p>Ремонтов</p>
+                        <p>{{ stat.title }}</p>
 
                     </div>
 
@@ -121,15 +64,11 @@
                 <div class="page-header">
 
                     <h1>
-
                         📦 Товары
-
                     </h1>
 
-                    <button class="add-btn" @click="showAddProduct = true">
-
+                    <button class="add-btn" @click="openCreateProduct">
                         + Добавить товар
-
                     </button>
 
                 </div>
@@ -137,81 +76,48 @@
                 <table class="products-table">
 
                     <thead>
-
                         <tr>
-
                             <th>ID</th>
-
                             <th>Фото</th>
-
                             <th>Название</th>
-
                             <th>Категория</th>
-
                             <th>Бренд</th>
-
                             <th>Цена</th>
-
+                            <th>Кол-во</th>
                             <th></th>
-
                         </tr>
-
                     </thead>
 
                     <tbody>
 
                         <tr v-for="product in products" :key="product.id">
 
+                            <td>{{ product.id }}</td>
+
                             <td>
-
-                                {{ product.id }}
-
+                                <img v-if="product.images.length" class="table-image"
+                                    :src="productImageUrl(product.id, product.images[0])">
+                                <span v-else class="table-image">📦</span>
                             </td>
 
-                            <td>
+                            <td>{{ product.name }}</td>
 
-                                <img class="table-image" :src="product.images.length
-                                    ? `http://localhost:5263/images/products/${product.id}/${product.images[0]}`
-                                    : 'https://placehold.co/60x60?text=📦'">
+                            <td>{{ product.category }}</td>
 
-                            </td>
+                            <td>{{ product.brand }}</td>
 
-                            <td>
+                            <td>{{ formatPrice(product.price) }} ₽</td>
 
-                                {{ product.name }}
-
-                            </td>
+                            <td>{{ product.quantity }}</td>
 
                             <td>
 
-                                {{ product.category }}
-
-                            </td>
-
-                            <td>
-
-                                {{ product.brand }}
-
-                            </td>
-
-                            <td>
-
-                                {{ product.price }} ₽
-
-                            </td>
-
-                            <td>
-
-                                <button class="edit">
-
+                                <button class="edit" @click="openEditProduct(product.id)">
                                     ✏️
-
                                 </button>
 
-                                <button class="delete" @click="deleteProduct(product.id)">
-
+                                <button class="delete" @click="removeProduct(product.id)">
                                     🗑
-
                                 </button>
 
                             </td>
@@ -229,136 +135,58 @@
             <template v-if="currentPage === 'users'">
 
                 <h1>
-
                     👥 Пользователи
-
                 </h1>
 
-                <div v-if="currentPage === 'users'">
+                <table class="users-table">
 
-                    <table class="users-table">
+                    <thead>
 
-                        <thead>
+                        <tr>
+                            <th @click="sortBy('id')">ID</th>
+                            <th @click="sortBy('fullName')">Имя</th>
+                            <th @click="sortBy('login')">Логин</th>
+                            <th @click="sortBy('email')">Почта</th>
+                            <th @click="sortBy('phone')">Телефон</th>
+                            <th @click="sortBy('role')">Роль</th>
+                            <th>Действия</th>
+                        </tr>
 
-                            <tr>
+                    </thead>
 
-                                <th @click="sortBy('id')">
-                                    ID
-                                </th>
+                    <tbody>
 
-                                <th @click="sortBy('fullName')">
-                                    Имя
-                                </th>
+                        <tr v-for="user in sortedUsers" :key="user.id">
 
-                                <th @click="sortBy('login')">
-                                    Логин
-                                </th>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.fullName || "—" }}</td>
+                            <td>{{ user.login }}</td>
+                            <td>{{ user.email || "—" }}</td>
+                            <td>{{ user.phone || "—" }}</td>
+                            <td>{{ user.role || "Без роли" }}</td>
 
-                                <th @click="sortBy('email')">
-                                    Почта
-                                </th>
+                            <td class="actions">
 
-                                <th @click="sortBy('phone')">
-                                    Телефон
-                                </th>
-
-                                <th @click="sortBy('role')">
-                                    Роль
-                                </th>
-
-                                <th>
-                                    Действия
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            <tr v-for="user in sortedUsers" :key="user.id">
-
-                                <td>{{ user.id }}</td>
-
-                                <td>{{ user.fullName }}</td>
-
-                                <td>{{ user.login }}</td>
-
-                                <td>{{ user.email || "—" }}</td>
-
-                                <td>{{ user.phone || "—" }}</td>
-
-                                <td>{{ user.role }}</td>
-
-                                <td class="actions">
+                                <template v-if="user.id !== auth.user?.id">
 
                                     <button class="edit-btn" @click="openRoleEdit(user)">
                                         ✏️
                                     </button>
 
-                                    <button class="delete-btn" @click="deleteUser(user.id)">
+                                    <button class="delete-btn" @click="removeUser(user.id)">
                                         🗑
                                     </button>
 
-                                </td>
+                                </template>
 
-                            </tr>
+                            </td>
 
-                        </tbody>
+                        </tr>
 
-                    </table>
+                    </tbody>
 
-                </div>
+                </table>
 
-                <!-- Окно изменения роли -->
-
-                <div v-if="editRoleUser" class="modal">
-
-                    <div class="modal-window">
-
-                        <h3>
-
-                            Изменить роль пользователя
-
-                        </h3>
-
-                        <p class="edit-user-name">
-
-                            {{ editRoleUser.fullName }}
-
-                        </p>
-
-                        <select v-model="editRoleUser.roleId" class="role-select">
-
-                            <option :value="2">
-                                User
-                            </option>
-
-                            <option :value="1">
-                                Admin
-                            </option>
-
-                        </select>
-
-                        <div class="actions">
-
-                            <button class="save-btn" @click="saveRole">
-
-                                💾 Сохранить
-
-                            </button>
-
-                            <button class="cancel-btn" @click="editRoleUser = null">
-
-                                ✖ Отмена
-
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
             </template>
 
             <!-- Заказы -->
@@ -366,179 +194,55 @@
             <template v-if="currentPage === 'orders'">
 
                 <h1>
-
                     🛒 Заказы
-
                 </h1>
 
-                <div v-if="currentPage === 'orders'">
-
-                    <table class="users-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>ID</th>
-
-                                <th>Клиент</th>
-
-                                <th>Телефон</th>
-
-                                <th>Сумма</th>
-
-                                <th>Статус</th>
-
-                                <th></th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            <tr v-for="order in orders" :key="order.id">
-
-                                <td>{{ order.id }}</td>
-
-                                <td>{{ order.userName }}</td>
-
-                                <td>{{ order.userPhone }}</td>
-
-                                <td>{{ order.totalPrice }} ₽</td>
-
-                                <td>
-                                    <select v-model="order.status" @change="changeStatus(order)" class="status-select">
-                                        <option value="Новый">Новый</option>
-                                        <option value="В работе">В работе</option>
-                                        <option value="Выполнен">Выполнен</option>
-                                        <option value="Отменён">Отменён</option>
-                                    </select>
-                                </td>
-
-                                <td>
-
-                                    <button @click="openOrder(order)">
-
-                                        Подробнее
-
-                                    </button>
-
-                                </td>
-                                <div v-if="selectedOrder" class="modal">
-
-                                    <div class="order-modal">
-
-                                        <h2>
-                                            📦 Заказ №{{ selectedOrder.id }}
-                                        </h2>
-
-                                        <div class="order-info">
-
-                                            <div>
-
-                                                <b>👤 Покупатель</b>
-
-                                                <p>{{ selectedOrder.fullName }}</p>
-
-                                            </div>
-
-                                            <div>
-
-                                                <b>📧 Почта</b>
-
-                                                <p>{{ selectedOrder.email }}</p>
-
-                                            </div>
-
-                                            <div>
-
-                                                <b>📞 Телефон</b>
-
-                                                <p>{{ selectedOrder.phone }}</p>
-
-                                            </div>
-
-                                            <div>
-
-                                                <b>📅 Дата</b>
-
-                                                <p>{{ formatDate(selectedOrder.orderDate) }}</p>
-
-                                            </div>
-
-                                            <div>
-
-                                                <b>💰 Сумма</b>
-
-                                                <p>{{ selectedOrder.totalPrice.toLocaleString() }} ₽</p>
-
-                                            </div>
-
-                                            <div>
-
-                                                <b>🚚 Статус</b>
-
-                                                <p>{{ selectedOrder.status }}</p>
-
-                                            </div>
-
-                                        </div>
-
-                                        <h3>
-
-                                            🛒 Состав заказа
-
-                                        </h3>
-
-                                        <table class="order-items-table">
-
-                                            <thead>
-
-                                                <tr>
-
-                                                    <th>Товар</th>
-
-                                                    <th>Количество</th>
-
-                                                    <th>Цена</th>
-
-                                                </tr>
-
-                                            </thead>
-
-                                            <tbody>
-
-                                                <tr v-for="item in selectedOrder.items" :key="item.productName">
-
-                                                    <td>{{ item.productName }}</td>
-
-                                                    <td>x{{ item.quantity }}</td>
-
-                                                    <td>{{ item.price.toLocaleString() }} ₽</td>
-
-                                                </tr>
-
-                                            </tbody>
-
-                                        </table>
-
-                                        <button class="close-btn" @click="closeOrder">
-
-                                            Закрыть
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-                            </tr>
-
-                        </tbody>
-
-                    </table>
-
-                </div>
+                <table class="users-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>ID</th>
+                            <th>Дата</th>
+                            <th>Клиент</th>
+                            <th>Телефон</th>
+                            <th>Сумма</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr v-for="order in orders" :key="order.id">
+
+                            <td>{{ order.id }}</td>
+                            <td>{{ formatDate(order.orderDate) }}</td>
+                            <td>{{ order.userName || "—" }}</td>
+                            <td>{{ order.userPhone || "—" }}</td>
+                            <td>{{ formatPrice(order.totalPrice) }} ₽</td>
+
+                            <td>
+                                <select v-model="order.status" class="status-select"
+                                    @change="changeOrderStatus(order)">
+                                    <option v-for="status in orderStatuses" :key="status" :value="status">
+                                        {{ status }}
+                                    </option>
+                                </select>
+                            </td>
+
+                            <td>
+                                <button @click="openOrder(order)">
+                                    Подробнее
+                                </button>
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
 
             </template>
 
@@ -551,69 +255,44 @@
                 </h1>
 
                 <table class="users-table">
+
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Дата</th>
                             <th>Клиент</th>
                             <th>Телефон</th>
+                            <th>Услуга</th>
                             <th>Проблема</th>
                             <th>Статус</th>
-                            <th></th>
                         </tr>
-
                     </thead>
 
                     <tbody>
 
                         <tr v-for="repair in repairs" :key="repair.id">
 
+                            <td>{{ repair.id }}</td>
+                            <td>{{ formatDate(repair.dateCreated) }}</td>
+                            <td>{{ repair.userName || "—" }}</td>
+                            <td>{{ repair.userPhone || "—" }}</td>
+                            <td>{{ repair.deviceType || "—" }}</td>
+                            <td>{{ repair.problem || "—" }}</td>
+
                             <td>
-                                {{ repair.id }}
-                            </td>
-                            <td>
-                                {{ repair.userName }}
-                            </td>
-                            <td>
-                                {{ repair.userPhone }}
-                            </td>
-                            <td>
-                                {{ repair.problem }}
-                            </td>
-                            <td>
-                                <select v-model="repair.status" @change="changeRepairStatus(repair)">
-                                    <option>
-                                        Принята
+                                <select v-model="repair.status" class="status-select"
+                                    @change="changeRepairStatus(repair)">
+                                    <option v-for="status in repairStatuses" :key="status" :value="status">
+                                        {{ status }}
                                     </option>
-
-
-                                    <option>
-                                        В работе
-                                    </option>
-
-
-                                    <option>
-                                        Готово
-                                    </option>
-
-
-                                    <option>
-                                        Отменена
-                                    </option>
-
-
                                 </select>
-
-
                             </td>
 
                         </tr>
 
-
                     </tbody>
 
-
                 </table>
-
 
             </template>
 
@@ -622,139 +301,240 @@
             <template v-if="currentPage === 'reviews'">
 
                 <h1>
-
                     ⭐ Отзывы
-
                 </h1>
 
-                <div class="empty">
-
-                    Здесь будут отзывы
-
+                <div v-if="reviews.length === 0" class="empty">
+                    Отзывов пока нет
                 </div>
 
-            </template>
+                <table v-else class="users-table">
 
-            <!-- Настройки -->
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Дата</th>
+                            <th>Товар</th>
+                            <th>Пользователь</th>
+                            <th>Оценка</th>
+                            <th>Комментарий</th>
+                            <th></th>
+                        </tr>
+                    </thead>
 
-            <template v-if="currentPage === 'settings'">
+                    <tbody>
 
-                <h1>
+                        <tr v-for="review in reviews" :key="review.id">
 
-                    ⚙ Настройки
+                            <td>{{ review.id }}</td>
+                            <td>{{ formatDate(review.createdAt) }}</td>
+                            <td>#{{ review.productId }}</td>
+                            <td>#{{ review.userId }}</td>
+                            <td>{{ "⭐".repeat(review.rating || 0) }}</td>
+                            <td>{{ review.comment || "—" }}</td>
 
-                </h1>
+                            <td class="actions">
+                                <button class="delete-btn" @click="removeReview(review.id)">
+                                    🗑
+                                </button>
+                            </td>
 
-                <div class="empty">
+                        </tr>
 
-                    Здесь будут настройки
+                    </tbody>
 
-                </div>
+                </table>
 
             </template>
 
         </main>
+
+        <!-- Окно изменения роли -->
+
+        <div v-if="editRoleUser" class="modal">
+
+            <div class="modal-window">
+
+                <h3>
+                    Изменить роль пользователя
+                </h3>
+
+                <p class="edit-user-name">
+                    {{ editRoleUser.fullName || editRoleUser.login }}
+                </p>
+
+                <select v-model="editRoleUser.roleId" class="role-select">
+                    <option v-for="role in roles" :key="role.id" :value="role.id">
+                        {{ role.roleName }}
+                    </option>
+                </select>
+
+                <div class="actions">
+
+                    <button class="save-btn" @click="saveRole">
+                        💾 Сохранить
+                    </button>
+
+                    <button class="cancel-btn" @click="editRoleUser = null">
+                        ✖ Отмена
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Подробности заказа -->
+
+        <div v-if="selectedOrder" class="modal" @click.self="selectedOrder = null">
+
+            <div class="order-modal">
+
+                <h2>
+                    📦 Заказ №{{ selectedOrder.id }}
+                </h2>
+
+                <div class="order-info">
+
+                    <div>
+                        <b>👤 Покупатель</b>
+                        <p>{{ selectedOrder.fullName || "—" }}</p>
+                    </div>
+
+                    <div>
+                        <b>📧 Почта</b>
+                        <p>{{ selectedOrder.email || "—" }}</p>
+                    </div>
+
+                    <div>
+                        <b>📞 Телефон</b>
+                        <p>{{ selectedOrder.phone || "—" }}</p>
+                    </div>
+
+                    <div>
+                        <b>📅 Дата</b>
+                        <p>{{ formatDate(selectedOrder.orderDate) }}</p>
+                    </div>
+
+                    <div>
+                        <b>💰 Сумма</b>
+                        <p>{{ formatPrice(selectedOrder.totalPrice) }} ₽</p>
+                    </div>
+
+                    <div>
+                        <b>🚚 Статус</b>
+                        <p>{{ selectedOrder.status }}</p>
+                    </div>
+
+                </div>
+
+                <h3>
+                    🛒 Состав заказа
+                </h3>
+
+                <table class="order-items-table">
+
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Количество</th>
+                            <th>Цена</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr v-for="item in selectedOrder.items" :key="item.productId">
+                            <td>{{ item.productName }}</td>
+                            <td>x{{ item.quantity }}</td>
+                            <td>{{ formatPrice(item.price) }} ₽</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+                <button class="close-btn" @click="selectedOrder = null">
+                    Закрыть
+                </button>
+
+            </div>
+
+        </div>
+
+        <!-- Добавление / редактирование товара -->
+
         <Transition name="slide">
 
-            <div v-if="showAddProduct" class="modal">
+            <div v-if="showProductForm" class="modal">
 
                 <div class="modal-window">
 
                     <div class="modal-header">
 
                         <h2>
-
-                            Новый товар
-
+                            {{ editingProductId ? `Товар #${editingProductId}` : "Новый товар" }}
                         </h2>
 
-                        <button class="close" @click="showAddProduct = false">
-
+                        <button class="close" @click="closeProductForm">
                             ✕
-
                         </button>
 
                     </div>
 
-                    <div class="form">
+                    <form class="form" @submit.prevent="saveProduct">
 
-                        <input v-model="form.name" placeholder="Название">
+                        <input v-model="form.name" placeholder="Название" required>
 
                         <textarea v-model="form.description" placeholder="Описание"></textarea>
 
-                        <input v-model="form.price" type="number" placeholder="Цена">
+                        <input v-model.number="form.price" type="number" min="0" step="0.01" placeholder="Цена"
+                            required>
 
-                        <input v-model="form.quantity" type="number" placeholder="Количество">
+                        <input v-model.number="form.quantity" type="number" min="0" placeholder="Количество" required>
 
-                        <input v-model="form.warrantyMonths" type="number" placeholder="Гарантия (месяцев)">
+                        <input v-model.number="form.warrantyMonths" type="number" min="0"
+                            placeholder="Гарантия (месяцев)">
 
                         <!-- Категория -->
 
-                        <select v-model="form.categoryId">
+                        <select v-model="form.categoryId" required>
 
-                            <option disabled value="">
-
+                            <option disabled :value="null">
                                 Выберите категорию
-
                             </option>
 
                             <option v-for="category in categories" :key="category.id" :value="category.id">
-
                                 {{ category.name }}
-
                             </option>
 
                         </select>
 
                         <!-- Бренд -->
 
-                        <select v-model="form.brandId">
+                        <select v-model="form.brandId" required>
 
-                            <option disabled value="">
-
+                            <option disabled :value="null">
                                 Выберите бренд
-
                             </option>
 
                             <option v-for="brand in brands" :key="brand.id" :value="brand.id">
-
                                 {{ brand.name }}
-
                             </option>
 
                         </select>
 
                         <!-- Характеристики телефона -->
 
-                        <template v-if="selectedCategory?.name === 'Смартфоны'">
+                        <template v-if="isPhoneCategory">
 
                             <h3>
-
                                 📱 Характеристики смартфона
-
                             </h3>
 
-                            <input v-model="form.phone.screenSize" placeholder="Размер экрана">
-
-                            <input v-model="form.phone.resolution" placeholder="Разрешение">
-
-                            <input v-model="form.phone.processor" placeholder="Процессор">
-
-                            <input v-model="form.phone.ram" placeholder="Оперативная память">
-
-                            <input v-model="form.phone.storage" placeholder="Память">
-
-                            <input v-model="form.phone.rearCamera" placeholder="Основная камера">
-
-                            <input v-model="form.phone.frontCamera" placeholder="Фронтальная камера">
-
-                            <input v-model="form.phone.battery" placeholder="Аккумулятор">
-
-                            <input v-model="form.phone.operatingSystem" placeholder="Операционная система">
-
-                            <input v-model="form.phone.simType" placeholder="SIM">
-
-                            <input v-model="form.phone.network" placeholder="Сеть">
+                            <input v-for="field in phoneFields" :key="field.key" v-model="form.phone[field.key]"
+                                :placeholder="field.label">
 
                         </template>
 
@@ -764,425 +544,442 @@
 
                             <label class="upload-btn">
 
-                                📷 Выбрать фотографии
+                                📷 {{ editingProductId ? "Добавить фотографии" : "Выбрать фотографии" }}
 
                                 <input hidden type="file" multiple accept="image/*" @change="selectImages">
 
                             </label>
 
                             <div class="preview">
-
-                                <img v-for="file in images" :key="file.name" :src="preview(file)">
-
+                                <img v-for="item in imagePreviews" :key="item.url" :src="item.url">
                             </div>
 
                         </div>
 
-                        <button class="save" @click="saveProduct">
-
-                            Сохранить
-
+                        <button class="save" type="submit" :disabled="saving">
+                            {{ saving ? "Сохранение..." : "Сохранить" }}
                         </button>
 
-                    </div>
+                    </form>
 
                 </div>
 
             </div>
 
         </Transition>
+
     </div>
 
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import api from "@/api/api";
+import { ref, computed, onMounted } from "vue";
+import { productImageUrl, errorMessage } from "@/api/api";
+import { useAuthStore } from "@/stores/auth";
+import {
+    getProducts, getProduct, createProduct, updateProduct, deleteProduct,
+    uploadProductImages, savePhoneSpec, getCategories, getBrands
+} from "@/api/products";
+import { getOrders, getOrder, updateOrderStatus } from "@/api/orders";
+import { getRepairs, updateRepairStatus } from "@/api/repairs";
+import { getUsers, deleteUser, updateUserRole, getRoles } from "@/api/users";
+import { getReviews, deleteReview } from "@/api/reviews";
 
-const users = ref([]);
+const tabs = [
+    { id: "dashboard", title: "📊 Панель" },
+    { id: "products", title: "📦 Товары" },
+    { id: "users", title: "👥 Пользователи" },
+    { id: "orders", title: "🛒 Заказы" },
+    { id: "repairs", title: "🔧 Ремонт" },
+    { id: "reviews", title: "⭐ Отзывы" }
+];
+
+// Статусы совпадают со списками на сервере (OrdersController / RepairsController)
+const orderStatuses = ["Новый", "В работе", "Выполнен", "Отменён"];
+const repairStatuses = ["Принята", "В работе", "Готово", "Отменена"];
+
+const phoneFields = [
+    { key: "screenSize", label: "Размер экрана" },
+    { key: "resolution", label: "Разрешение" },
+    { key: "processor", label: "Процессор" },
+    { key: "ram", label: "Оперативная память" },
+    { key: "storage", label: "Память" },
+    { key: "rearCamera", label: "Основная камера" },
+    { key: "frontCamera", label: "Фронтальная камера" },
+    { key: "battery", label: "Аккумулятор" },
+    { key: "operatingSystem", label: "Операционная система" },
+    { key: "simType", label: "SIM" },
+    { key: "network", label: "Сеть" }
+];
+
+const auth = useAuthStore();
+
+const currentPage = ref("dashboard");
+
+const products = ref([]);
+const productsTotal = ref(0);
 const categories = ref([]);
 const brands = ref([]);
-const currentPage = ref("dashboard");
-const products = ref([]);
-const showAddProduct = ref(false);
-const images = ref([]);
+const users = ref([]);
+const roles = ref([]);
+const orders = ref([]);
+const repairs = ref([]);
+const reviews = ref([]);
+
 const sortField = ref("id");
 const sortAsc = ref(true);
-const repairs = ref([]);
-const form = ref({
 
-    name: "",
-
-    description: "",
-
-    price: 0,
-
-    quantity: 1,
-
-    warrantyMonths: 12,
-
-    categoryId: "",
-
-    brandId: "",
-
-    phone: {
-
-        screenSize: "",
-
-        resolution: "",
-
-        processor: "",
-
-        ram: "",
-
-        storage: "",
-
-        rearCamera: "",
-
-        frontCamera: "",
-
-        battery: "",
-
-        operatingSystem: "",
-
-        simType: "",
-
-        network: ""
-
-    }
-});
 const editRoleUser = ref(null);
-const orders = ref([]);
 const selectedOrder = ref(null);
-const roles = ref([
-    {
-        id: 1,
-        name: "User"
-    },
-    {
-        id: 2,
-        name: "Admin"
-    }
+
+const showProductForm = ref(false);
+const editingProductId = ref(null);
+const saving = ref(false);
+const images = ref([]);
+const imagePreviews = ref([]);
+const form = ref(emptyProductForm());
+
+function emptyProductForm() {
+    return {
+        name: "",
+        description: "",
+        price: 0,
+        quantity: 1,
+        warrantyMonths: 12,
+        categoryId: null,
+        brandId: null,
+        phone: Object.fromEntries(phoneFields.map(f => [f.key, ""]))
+    };
+}
+
+const stats = computed(() => [
+    { icon: "📦", value: productsTotal.value, title: "Товаров" },
+    { icon: "👥", value: users.value.length, title: "Пользователей" },
+    { icon: "🛒", value: orders.value.length, title: "Заказов" },
+    { icon: "🔧", value: repairs.value.length, title: "Ремонтов" }
 ]);
+
 const sortedUsers = computed(() => {
+
+    const direction = sortAsc.value ? 1 : -1;
 
     return [...users.value].sort((a, b) => {
 
-        let x = a[sortField.value];
-        let y = b[sortField.value];
+        // null и пустые значения всегда в конце
+        const x = a[sortField.value] ?? "";
+        const y = b[sortField.value] ?? "";
 
-        if (typeof x === "string") {
+        if (typeof x === "number" && typeof y === "number")
+            return (x - y) * direction;
 
-            x = x.toLowerCase();
-            y = y.toLowerCase();
-
-        }
-
-        if (x < y)
-            return sortAsc.value ? -1 : 1;
-
-        if (x > y)
-            return sortAsc.value ? 1 : -1;
-
-        return 0;
+        return String(x).localeCompare(String(y), "ru") * direction;
 
     });
 
 });
-const selectedCategory = computed(() => {
 
-    return categories.value.find(
+const isPhoneCategory = computed(() =>
+    categories.value.find(x => x.id === form.value.categoryId)?.name === "Смартфоны"
+);
 
-        x => x.id == form.value.categoryId
-
-    );
-
-});
-
-async function loadOrders() {
-
-    const { data } = await api.get("/orders");
-
-    orders.value = data;
-
-}
-async function loadRepairs() {
-
-    try {
-
-        const { data } = await api.get("/repairs");
-
-        repairs.value = data;
-
-    }
-    catch (e) {
-
-        console.error(e);
-
-    }
-
-}
-async function openOrder(order) {
-
-    try {
-
-        const { data } = await api.get(`/orders/${order.id}/details`);
-
-        selectedOrder.value = data;
-
-    }
-
-    catch (e) {
-
-        console.error(e);
-
-    }
-
-}
-function formatDate(date) {
-
-    return new Date(date).toLocaleString("ru-RU", {
-
-        day: "2-digit",
-
-        month: "2-digit",
-
-        year: "numeric",
-
-        hour: "2-digit",
-
-        minute: "2-digit"
-
-    });
-
-}
-function closeOrder() {
-
-    selectedOrder.value = null;
-
-}
-function openRoleEdit(user) {
-
-    editRoleUser.value = {
-        id: user.id,
-        roleId: user.roleId
-    };
-
-}
-async function saveRole() {
-
-    console.log(editRoleUser.value);
-
-    await api.put(
-        `/users/${editRoleUser.value.id}/role`,
-        editRoleUser.value.roleId,
-        {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }
-    );
-
-    editRoleUser.value = null;
-
-    await loadUsers();
-
-}
-async function deleteUser(id) {
-
-    if (!confirm("Удалить пользователя?"))
-        return;
-
-
-    await api.delete(`/users/${id}`);
-
-
-    await loadUsers();
-
-}
-async function loadUsers() {
-
-    const { data } = await api.get("/users");
-
-    users.value = data;
-
-}
-
-async function loadCategories() {
-
-    const { data } = await api.get("/categories");
-
-    categories.value = data;
-
-}
-
-async function loadBrands() {
-
-    const { data } = await api.get("/brands");
-
-    brands.value = data;
-
-}
 function sortBy(field) {
 
     if (sortField.value === field) {
-
         sortAsc.value = !sortAsc.value;
-
     }
     else {
-
         sortField.value = field;
-
         sortAsc.value = true;
-
     }
 
 }
-function preview(file) {
 
-    return window.URL.createObjectURL(file);
+function formatDate(date) {
+
+    return new Date(date).toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+}
+
+function formatPrice(price) {
+    return Number(price ?? 0).toLocaleString("ru-RU");
+}
+
+// Выполнить действие и показать ошибку сервера, если она есть
+async function run(action, fallback) {
+
+    try {
+        await action();
+        return true;
+    }
+    catch (e) {
+        console.error(e);
+        alert(errorMessage(e, fallback));
+        return false;
+    }
+
+}
+
+// ---------- Загрузка данных ----------
+
+async function loadProducts() {
+
+    // на сервере страница ограничена 100 товарами — забираем все страницы
+    const all = [];
+    let page = 1;
+    let total = 0;
+
+    do {
+        const { data } = await getProducts({ page, pageSize: 100, sort: "name" });
+
+        all.push(...data.products);
+        total = data.total;
+        page++;
+    } while (all.length < total);
+
+    products.value = all;
+    productsTotal.value = total;
+}
+
+async function loadCategories() {
+    categories.value = (await getCategories()).data;
+}
+
+async function loadBrands() {
+    brands.value = (await getBrands()).data;
+}
+
+async function loadUsers() {
+    users.value = (await getUsers()).data;
+}
+
+async function loadRoles() {
+    roles.value = (await getRoles()).data;
+}
+
+async function loadOrders() {
+    orders.value = (await getOrders()).data;
+}
+
+async function loadRepairs() {
+    repairs.value = (await getRepairs()).data;
+}
+
+async function loadReviews() {
+    reviews.value = (await getReviews()).data;
+}
+
+// ---------- Товары ----------
+
+function openCreateProduct() {
+
+    editingProductId.value = null;
+    form.value = emptyProductForm();
+    clearImages();
+    showProductForm.value = true;
+
+}
+
+async function openEditProduct(id) {
+
+    await run(async () => {
+
+        const { data } = await getProduct(id);
+
+        const phone = emptyProductForm().phone;
+
+        if (data.phone)
+            phoneFields.forEach(f => { phone[f.key] = data.phone[f.key] ?? ""; });
+
+        form.value = {
+            name: data.name,
+            description: data.description ?? "",
+            price: data.price,
+            quantity: data.quantity,
+            warrantyMonths: data.warrantyMonths,
+            categoryId: data.categoryId,
+            brandId: data.brandId,
+            phone
+        };
+
+        editingProductId.value = id;
+        clearImages();
+        showProductForm.value = true;
+
+    }, "Не удалось загрузить товар");
+
+}
+
+function closeProductForm() {
+
+    showProductForm.value = false;
+    clearImages();
 
 }
 
 function selectImages(e) {
 
+    clearImages();
+
     images.value = [...e.target.files];
+
+    imagePreviews.value = images.value.map(file => ({ url: URL.createObjectURL(file) }));
+
+    e.target.value = "";
 
 }
 
-async function loadProducts() {
+// освобождаем blob-ссылки превью, иначе они копятся в памяти
+function clearImages() {
 
-    try {
+    imagePreviews.value.forEach(item => URL.revokeObjectURL(item.url));
 
-        const { data } = await api.get("/products");
-
-        // if (
-        //     selectedCategory.value?.name === "Смартфоны"
-        // ) {
-        //     await api.post(
-
-        //         `/products/${data.id}/phone`,
-
-        //         form.value.phone
-
-        //     );
-        // }
-
-        products.value = data.products;
-
-    }
-    catch (e) {
-
-        console.error(e);
-
-    }
+    imagePreviews.value = [];
+    images.value = [];
 
 }
 
 async function saveProduct() {
-    console.log("PRODUCT");
-    try {
 
-        const { data } = await api.post(
-            "/products",
-            form.value
-        );
+    saving.value = true;
 
-        // сохраняем характеристики
+    const { phone, ...product } = form.value;
 
-        if (selectedCategory.value?.name === "Смартфоны") {
+    const ok = await run(async () => {
 
-            await api.post(
-                `/products/${data.id}/phone`,
-                form.value.phone
-            );
+        let id = editingProductId.value;
 
-        }
+        if (id)
+            await updateProduct(id, product);
+        else
+            id = (await createProduct(product)).data.id;
 
-        // загружаем изображения
+        if (isPhoneCategory.value)
+            await savePhoneSpec(id, phone);
 
-        if (images.value.length > 0) {
+        if (images.value.length > 0)
+            await uploadProductImages(id, images.value);
 
-            const fd = new FormData();
+    }, "Не удалось сохранить товар");
 
-            images.value.forEach(image => {
+    saving.value = false;
 
-                fd.append("files", image);
-
-            });
-
-            await api.post(
-                `/products/${data.id}/images`,
-                fd
-            );
-
-        }
-        console.log("SAVE PRODUCT");
-    }
-    catch (e) {
-
-        console.error(e);
-
+    if (ok) {
+        closeProductForm();
+        await loadProducts();
     }
 
 }
-async function changeStatus(order) {
 
-    try {
-
-        await api.patch(
-            `/orders/${order.id}/status`,
-            order.status,
-            {
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-    } catch (e) {
-
-        console.error(e);
-
-    }
-
-}
-async function deleteProduct(id) {
+async function removeProduct(id) {
 
     if (!confirm("Удалить товар?"))
         return;
 
-    await api.delete(`/products/${id}`);
-
-    await loadProducts();
+    if (await run(() => deleteProduct(id), "Не удалось удалить товар"))
+        await loadProducts();
 
 }
+
+// ---------- Пользователи ----------
+
+function openRoleEdit(user) {
+
+    editRoleUser.value = {
+        id: user.id,
+        login: user.login,
+        fullName: user.fullName,
+        roleId: user.roleId
+    };
+
+}
+
+async function saveRole() {
+
+    const ok = await run(
+        () => updateUserRole(editRoleUser.value.id, editRoleUser.value.roleId),
+        "Не удалось изменить роль"
+    );
+
+    if (ok) {
+        editRoleUser.value = null;
+        await loadUsers();
+    }
+
+}
+
+async function removeUser(id) {
+
+    if (!confirm("Удалить пользователя?"))
+        return;
+
+    if (await run(() => deleteUser(id), "Не удалось удалить пользователя"))
+        await loadUsers();
+
+}
+
+// ---------- Заказы и ремонты ----------
+
+async function openOrder(order) {
+
+    await run(async () => {
+        selectedOrder.value = (await getOrder(order.id)).data;
+    }, "Не удалось загрузить заказ");
+
+}
+
+async function changeOrderStatus(order) {
+
+    if (!await run(() => updateOrderStatus(order.id, order.status), "Не удалось изменить статус"))
+        await loadOrders();
+
+}
+
+async function changeRepairStatus(repair) {
+
+    if (!await run(() => updateRepairStatus(repair.id, repair.status), "Не удалось изменить статус"))
+        await loadRepairs();
+
+}
+
+// ---------- Отзывы ----------
+
+async function removeReview(id) {
+
+    if (!confirm("Удалить отзыв?"))
+        return;
+
+    if (await run(() => deleteReview(id), "Не удалось удалить отзыв"))
+        await loadReviews();
+
+}
+
 onMounted(async () => {
 
-    loadProducts();
+    const results = await Promise.allSettled([
+        loadProducts(),
+        loadCategories(),
+        loadBrands(),
+        loadUsers(),
+        loadRoles(),
+        loadOrders(),
+        loadRepairs(),
+        loadReviews()
+    ]);
 
-    loadCategories();
-
-    loadBrands();
-
-    loadUsers();
-
-    await loadOrders();
-
-    await loadRepairs();
+    results
+        .filter(x => x.status === "rejected")
+        .forEach(x => console.error(x.reason));
 
 });
 </script>
 
 <style scoped>
-.users-table th {
-
-    cursor: pointer;
-
-    user-select: none;
-
-}
 
 .users-table th:hover {
 
@@ -1205,6 +1002,11 @@ onMounted(async () => {
 }
 
 .users-table th {
+
+    cursor: pointer;
+
+    user-select: none;
+
 
     background: #2563eb;
 
@@ -1916,6 +1718,28 @@ h1 {
 .close-btn:hover {
 
     background: #1d4ed8;
+
+}
+
+.status-select {
+
+    padding: 8px 12px;
+
+    border: 1px solid #dbe3ee;
+
+    border-radius: 10px;
+
+    background: white;
+
+    cursor: pointer;
+
+}
+
+.save:disabled {
+
+    opacity: .6;
+
+    cursor: wait;
 
 }
 </style>
